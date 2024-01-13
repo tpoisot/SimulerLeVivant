@@ -8,7 +8,7 @@ Pour lancer les aide-mémoire / démonstrations:
 
 ## Liste des démonstrations
 
-- 🤔
+- [Modèle logistique](demonstrations/01_logistique.jl)
 
 ## Liste des aide-mémoire
 
