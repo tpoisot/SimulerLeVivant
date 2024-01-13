@@ -14,3 +14,4 @@ Pour lancer les aide-mémoire / démonstrations:
 
 - [Conditions et itération](aidememoire/01_conditions.jl)
 - [Accéder aux éléments de matrices](aidememoire/02_indexing.jl)
+- [Les fonctions](aidememoire/03_fonctions.jl)
