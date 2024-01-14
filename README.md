@@ -9,6 +9,7 @@ Pour lancer les aide-mémoire / démonstrations:
 ## Liste des démonstrations
 
 - [Modèle logistique](demonstrations/01_logistique.jl)
+- [*Game of Life* (v1)](demonstrations/02_gameoflife.jl)
 
 ## Liste des aide-mémoire
 
