@@ -14,93 +14,57 @@ macro bind(def, element)
     end
 end
 
-# ╔═╡ 97312e8b-406b-40fa-abb4-29a5a3cbc844
+# ╔═╡ 1e73c443-9467-41ee-97c9-e2d45084b6d8
 using PlutoUI
 
-# ╔═╡ bdcd4002-b0ac-11ee-092a-bb4a6f266b24
+# ╔═╡ b42541fe-b315-11ee-296b-4963845be41d
 md"""
-# Conditions
+# Itération
 
-On peut choisir les instructions qu'il faut éxécuter selon une *condition*. Une condtion évalue une valeur *Booléenne*, dont les valeurs sont `true` ou `false`.
-
+Les structures `for` et `while` permettent de répéter une opération plusieurs fois, et servent aussi à se déplacer dans des structures de données plus complexes (vecteurs, matrices, ...).
 """
 
-# ╔═╡ 46edf949-f4b9-477f-81e0-cfd766d22f2b
+# ╔═╡ dd818d00-efee-4127-9f42-eddb8793358d
 md"""
-On peut par exemple tester la condition `x < y`, avec
-
-x : $(@bind x Scrubbable(1:6; default=2))
-y : $(@bind y Scrubbable(1:6; default=4))
+Générer une série de $(@bind n Scrubbable(2:5; default=4)) nombres aléatoires (la longueur de la série est stockée dans la variable `n`).
 """
 
-# ╔═╡ 48b495e3-1d21-4021-8dcc-8aac20a4569c
-if x < y
-	"x < y"
-else
-	"x ≥ y"
+# ╔═╡ da45731c-3230-4c8e-8656-70fff95d31fa
+for i in 1:n
+	@info rand()
 end
 
-# ╔═╡ 655ccce2-8aeb-470b-b04e-397052551b5a
+# ╔═╡ 9b2d9f98-4b1b-437d-b0e8-5742163d034d
 md"""
-Le résultat d'une comparaison est une valeur Booléenne; par exemple, le resultat de `x < y` est $(x < y).
+Une alternative à la structure `for`/`end` est `while`/`end`:
 """
 
-# ╔═╡ afda3d5b-f6e2-4ed7-a3ff-ba70a992f2c7
-md"""
-!!! info "Opérateurs de comparaison"
-	On peut tester l'égalité (`==`), les inégalités (`<`, `>`, `>=`, `<=`), et l'inégalité (`!=`). Pour certains opérateurs, on peut utiliser [le symbole qui correspond](https://docs.julialang.org/en/v1/manual/unicode-input/); par exemple, `≠` (`\neq<Tab>`) est équivalent à `!=`.
-"""
-
-# ╔═╡ 60215782-77af-43a9-bdb5-5d0fba63b8d5
-md"""
-On peut enchaîner plusieurs comparaisons avec la structure `if`/`elseif`/`else`:
-"""
-
-# ╔═╡ ca0555d0-332e-4d91-a60b-b96d2c3c4698
-if x == y
-	"x = y"
-elseif x < y
-	"x < y"
-else
-	"x > y"
+# ╔═╡ eb750401-3a71-49d4-bc36-14f94d330feb
+begin
+	step = 1
+	while step ≤ n
+		step += 1
+		@info rand()
+	end
 end
 
-# ╔═╡ 6a38c72a-da5d-49a4-a940-b07f4adfe862
+# ╔═╡ 5426ab86-7800-47c4-9c0f-c85af3235c78
 md"""
-On peut enchaîner les comparaisons avec les opérateurs *not* (`!`, `~`), *and* (`&`), et *or* (`|`):
+!!! danger "Boucles infinies"
+	Une boucle `while` se termine quand une n'est plus satisfaite (ici, `step ≤ n`). Si cette condition n'est jamais satisfaite, la boucle *ne peut pas* terminer.
 """
 
-# ╔═╡ 97df2b0b-904b-4192-b340-da87f30d7b50
-!true
-
-# ╔═╡ a7984bca-f097-417d-9b97-767492770b3e
-!false
-
-# ╔═╡ 012bf2eb-f91d-44cd-84ae-54ef68623b08
-true & false
-
-# ╔═╡ d63ea0b5-ff91-428b-9b51-b9b3d781ca0c
-true & true
-
-# ╔═╡ 3fa816d0-20f8-4568-bfad-a1bda28c74ed
-false & true
-
-# ╔═╡ 93520494-bb16-4bf0-97f8-dd5f4441165f
+# ╔═╡ 570eec06-1d2f-447f-8649-2b7988b7ad5f
 md"""
-Exercice optionnel: l'opérateur *xor* ("ou exclusif") renvoie `true` pour $p \oplus q$ si $p \lor q$ ($p$ *ou* $q$ est vrai) mais pas si $p \land q$ (à la fois $p$ et $q$ sont vrais). 
-
-Dans le code suivant, ajoutez une ligne qui renvoie le résultat de l'opérateur *xor*.
+Exercice optionnel: affichez la liste des nombres pairs entre 1 et 10. On peut générer une liste de ces nombres avec `1:10` et tester si un nombre est pair avec la fonction `iseven`.
 
 !!! hint "Indice"
-	On peut enchaîner plusieurs opérations logiques en les mettant entre parenthèses. Par exemple, le résultat de `(true | false) & true` est `true`.
+	On peut utiliser une condition à l'intérieur d'une boucle! Dans ce cas, chaque structure a son propre `end` pour marquer la fin.
+
 """
 
-# ╔═╡ d9046d49-9ffd-473d-af2e-5d295866e1b7
-begin
-	p = true
-	q = false
-	p_xor_q = false # Modifiez cette ligne!
-end
+# ╔═╡ 317be737-90cc-4948-a2fd-912bf597d85a
+# Liste des nombres pairs entre 1 et 10
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -380,21 +344,14 @@ version = "17.4.0+2"
 """
 
 # ╔═╡ Cell order:
-# ╟─bdcd4002-b0ac-11ee-092a-bb4a6f266b24
-# ╟─46edf949-f4b9-477f-81e0-cfd766d22f2b
-# ╠═48b495e3-1d21-4021-8dcc-8aac20a4569c
-# ╟─655ccce2-8aeb-470b-b04e-397052551b5a
-# ╟─afda3d5b-f6e2-4ed7-a3ff-ba70a992f2c7
-# ╟─60215782-77af-43a9-bdb5-5d0fba63b8d5
-# ╠═ca0555d0-332e-4d91-a60b-b96d2c3c4698
-# ╠═6a38c72a-da5d-49a4-a940-b07f4adfe862
-# ╠═97df2b0b-904b-4192-b340-da87f30d7b50
-# ╠═a7984bca-f097-417d-9b97-767492770b3e
-# ╠═012bf2eb-f91d-44cd-84ae-54ef68623b08
-# ╠═d63ea0b5-ff91-428b-9b51-b9b3d781ca0c
-# ╠═3fa816d0-20f8-4568-bfad-a1bda28c74ed
-# ╠═93520494-bb16-4bf0-97f8-dd5f4441165f
-# ╠═d9046d49-9ffd-473d-af2e-5d295866e1b7
-# ╟─97312e8b-406b-40fa-abb4-29a5a3cbc844
+# ╟─b42541fe-b315-11ee-296b-4963845be41d
+# ╠═dd818d00-efee-4127-9f42-eddb8793358d
+# ╠═da45731c-3230-4c8e-8656-70fff95d31fa
+# ╟─9b2d9f98-4b1b-437d-b0e8-5742163d034d
+# ╠═eb750401-3a71-49d4-bc36-14f94d330feb
+# ╟─5426ab86-7800-47c4-9c0f-c85af3235c78
+# ╠═570eec06-1d2f-447f-8649-2b7988b7ad5f
+# ╠═317be737-90cc-4948-a2fd-912bf597d85a
+# ╟─1e73c443-9467-41ee-97c9-e2d45084b6d8
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
