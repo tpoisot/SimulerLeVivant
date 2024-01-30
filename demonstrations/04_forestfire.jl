@@ -7,9 +7,6 @@ using InteractiveUtils
 # ╔═╡ cebb1a80-bf7d-11ee-264b-6195b4444d9d
 using CairoMakie
 
-# ╔═╡ fe9640ae-b73c-4ca8-9cea-ffc078a6ced7
-using PlutoUI
-
 # ╔═╡ c607a4e5-7940-4afd-8c7c-1e98af48f1f1
 md"""
 # Modèle de feu de forêt
@@ -125,8 +122,18 @@ md"""
 # ╔═╡ 62ac4e32-686f-416c-9fa9-49429de9999c
 etat = etat_initial(lignes, colonnes; P_a=couverture_initiale)
 
+# ╔═╡ 329b7289-9eba-46a5-862a-5d0e50dabb32
+md"""
+Pour faciliter les discussions en classe, nous allons garder une trace du temps écoulé depuis le dernier feu,
+"""
+
 # ╔═╡ 531f17dc-ba3f-4cd6-96f4-931ed8e636ba
 temps_depuis_feu = zeros(Int64, size(etat))
+
+# ╔═╡ da7660e3-e0a2-4e5c-90f5-c0999d3047ce
+md"""
+ainsi que de l'âge de l'arbre sur chaque parcelle:
+"""
 
 # ╔═╡ 58188ff7-7afd-47c2-8adf-91de1aaa8275
 age_des_arbres = zeros(Int64, size(etat))
@@ -237,11 +244,9 @@ end
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
-PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 
 [compat]
 CairoMakie = "~0.11.5"
-PlutoUI = "~0.7.55"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -250,7 +255,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.10.0"
 manifest_format = "2.0"
-project_hash = "98167f1dc08bd301575d4dcbeee7c4ed2eac9380"
+project_hash = "4f2a8837102d71e1fac1657aec2e6fa866903d43"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -267,12 +272,6 @@ weakdeps = ["ChainRulesCore", "Test"]
 git-tree-sha1 = "222ee9e50b98f51b5d78feb93dd928880df35f06"
 uuid = "398f06c4-4d28-53ec-89ca-5b2656b7603d"
 version = "0.3.0"
-
-[[deps.AbstractPlutoDingetjes]]
-deps = ["Pkg"]
-git-tree-sha1 = "c278dfab760520b8bb7e9511b968bf4ba38b7acc"
-uuid = "6e696c72-6542-2067-7265-42206c756150"
-version = "1.2.3"
 
 [[deps.AbstractTrees]]
 git-tree-sha1 = "faa260e4cb5aba097a73fab382dd4b5819d8ec8c"
@@ -790,24 +789,6 @@ git-tree-sha1 = "f218fe3736ddf977e0e772bc9a586b2383da2685"
 uuid = "34004b35-14d8-5ef3-9330-4cdb6864b03a"
 version = "0.3.23"
 
-[[deps.Hyperscript]]
-deps = ["Test"]
-git-tree-sha1 = "179267cfa5e712760cd43dcae385d7ea90cc25a4"
-uuid = "47d2ed2b-36de-50cf-bf87-49c2cf4b8b91"
-version = "0.0.5"
-
-[[deps.HypertextLiteral]]
-deps = ["Tricks"]
-git-tree-sha1 = "7134810b1afce04bbc1045ca1985fbe81ce17653"
-uuid = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
-version = "0.9.5"
-
-[[deps.IOCapture]]
-deps = ["Logging", "Random"]
-git-tree-sha1 = "8b72179abc660bfab5e28472e019392b97d0985c"
-uuid = "b5f81e59-6552-4d32-b1f0-c071b021bf89"
-version = "0.2.4"
-
 [[deps.ImageAxes]]
 deps = ["AxisArrays", "ImageBase", "ImageCore", "Reexport", "SimpleTraits"]
 git-tree-sha1 = "2e4520d67b0cef90865b3ef727594d2a58e0e1f8"
@@ -1089,11 +1070,6 @@ version = "0.3.26"
 [[deps.Logging]]
 uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
-[[deps.MIMEs]]
-git-tree-sha1 = "65f28ad4b594aebe22157d6fac869786a255b7eb"
-uuid = "6c6e2e6c-3030-632d-7369-2d6c69616d65"
-version = "0.1.4"
-
 [[deps.MKL_jll]]
 deps = ["Artifacts", "IntelOpenMP_jll", "JLLWrappers", "LazyArtifacts", "Libdl"]
 git-tree-sha1 = "72dc3cf284559eb8f53aa593fe62cb33f83ed0c0"
@@ -1353,12 +1329,6 @@ deps = ["ColorSchemes", "Colors", "Dates", "PrecompileTools", "Printf", "Random"
 git-tree-sha1 = "862942baf5663da528f66d24996eb6da85218e76"
 uuid = "995b91a9-d308-5afd-9ec6-746e21dbc043"
 version = "1.4.0"
-
-[[deps.PlutoUI]]
-deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "FixedPointNumbers", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "MIMEs", "Markdown", "Random", "Reexport", "URIs", "UUIDs"]
-git-tree-sha1 = "68723afdb616445c6caaef6255067a8339f91325"
-uuid = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
-version = "0.7.55"
 
 [[deps.PolygonOps]]
 git-tree-sha1 = "77b3d3605fc1cd0b42d95eba87dfcd2bf67d5ff6"
@@ -1719,11 +1689,6 @@ weakdeps = ["Random", "Test"]
     [deps.TranscodingStreams.extensions]
     TestExt = ["Test", "Random"]
 
-[[deps.Tricks]]
-git-tree-sha1 = "eae1bb484cd63b36999ee58be2de6c178105112f"
-uuid = "410a4b4d-49e4-4fbc-ab6d-cb71b17b3775"
-version = "0.1.8"
-
 [[deps.TriplotBase]]
 git-tree-sha1 = "4d4ed7f294cda19382ff7de4c137d24d16adc89b"
 uuid = "981d1d27-644d-49a2-9326-4793e63143c3"
@@ -1733,11 +1698,6 @@ version = "0.1.0"
 git-tree-sha1 = "155515ed4c4236db30049ac1495e2969cc06be9d"
 uuid = "9d95972d-f1c8-5527-a6e0-b4b365fa01f6"
 version = "1.4.3"
-
-[[deps.URIs]]
-git-tree-sha1 = "67db6cc7b3821e19ebe75791a9dd19c9b1188f2b"
-uuid = "5c2747f8-b7ea-4ff2-ba2e-563bfd36b1d4"
-version = "1.5.1"
 
 [[deps.UUIDs]]
 deps = ["Random", "SHA"]
@@ -1922,14 +1882,15 @@ version = "3.5.0+0"
 # ╠═03ee308a-c479-40a0-8d2d-49da85398063
 # ╟─ea7aaef6-b597-426e-857a-7a40e7dd6b7d
 # ╠═62ac4e32-686f-416c-9fa9-49429de9999c
+# ╟─329b7289-9eba-46a5-862a-5d0e50dabb32
 # ╠═531f17dc-ba3f-4cd6-96f4-931ed8e636ba
+# ╟─da7660e3-e0a2-4e5c-90f5-c0999d3047ce
 # ╠═58188ff7-7afd-47c2-8adf-91de1aaa8275
+# ╟─c545d805-7798-409f-aaac-e90e9178fc14
 # ╠═974a63e3-f2a8-42fc-ba00-21f8b94969ec
 # ╠═fc6586f6-055d-486d-b1e9-42f51f727f3c
-# ╟─c545d805-7798-409f-aaac-e90e9178fc14
 # ╟─b021c652-aa2f-4c53-b425-5090535a9345
 # ╠═cebb1a80-bf7d-11ee-264b-6195b4444d9d
-# ╠═fe9640ae-b73c-4ca8-9cea-ffc078a6ced7
 # ╠═824e29f9-20df-4d02-b294-df89ec706a6a
 # ╠═8a762b10-8695-46e3-bd64-f0e42b215b93
 # ╠═28287b56-95db-4058-b9bf-c530a236e532
