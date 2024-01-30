@@ -76,6 +76,25 @@ function regle_cellule_arbre(voisin_en_feu, P_a_f)
 	end
 end
 
+# ╔═╡ ee71ffde-d3f0-40a5-a99a-e6e70fbd2567
+"""
+TODO
+"""
+function mise_a_jour(t0, P_v_a, P_a_f)
+	t1 = copy(t0)
+	feux = voisin_brule(t0)
+	for (position, etat) in enumerate(t0)
+		if etat == 1
+			t1[position] = regle_cellule_vide(P_v_a)
+		elseif etat == 2
+			t1[position] = regle_cellule_arbre(feux[position], P_a_f)
+		elseif etat == 3
+			t1[position] = regle_cellule_en_feu()
+		end
+	end
+	return t1
+end
+
 # ╔═╡ e1e8fc1c-07c4-4a10-a3d7-3ceec61cd600
 md"""
 ## Conditions
@@ -99,6 +118,9 @@ frequence_nouveaux_feux = frequence_nouveaux_arbres / ratio_feux
 md"""
 ## Simulation
 """
+
+# ╔═╡ 57417151-b3f0-476a-9c3b-ad3f28729422
+mise_a_jour(etat, frequence_nouveaux_arbres, frequence_nouveaux_feux)
 
 # ╔═╡ b021c652-aa2f-4c53-b425-5090535a9345
 md"""
@@ -129,28 +151,6 @@ function voisin_brule(paysage)
 	end
 	return en_feu
 end
-
-# ╔═╡ ee71ffde-d3f0-40a5-a99a-e6e70fbd2567
-"""
-TODO
-"""
-function mise_a_jour(t0, P_v_a, P_a_f)
-	t1 = copy(t0)
-	feux = voisin_brule(t0)
-	for (position, etat) in enumerate(t0)
-		if etat == 1
-			t1[position] = regle_cellule_vide(P_v_a)
-		elseif etat == 2
-			t1[position] = regle_cellule_arbre(feux[position], P_a_f)
-		elseif etat == 3
-			t1[position] = regle_cellule_en_feu()
-		end
-	end
-	return t1
-end
-
-# ╔═╡ 57417151-b3f0-476a-9c3b-ad3f28729422
-mise_a_jour(etat, frequence_nouveaux_arbres, frequence_nouveaux_feux)
 
 # ╔═╡ 58316e4c-836e-4032-b035-a205f8d994d4
 #=
