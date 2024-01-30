@@ -105,6 +105,9 @@ md"""
 ## Autres informations
 """
 
+# ╔═╡ 824e29f9-20df-4d02-b294-df89ec706a6a
+CairoMakie.activate!(; px_per_unit = 2)
+
 # ╔═╡ 8a762b10-8695-46e3-bd64-f0e42b215b93
 """
 """
@@ -174,7 +177,7 @@ begin
 end
 
 # ╔═╡ e2894bf2-9780-472b-ab82-f0cf78309a02
-CairoMakie.Makie.Record(fig, 1:1000) do i
+CairoMakie.Makie.Record(fig, 1:200; framerate=10) do i
 	etat = mise_a_jour(etat, frequence_nouveaux_arbres, frequence_nouveaux_feux)
 	pl[1] = etat
 end
@@ -1786,6 +1789,7 @@ version = "3.5.0+0"
 # ╠═e2894bf2-9780-472b-ab82-f0cf78309a02
 # ╟─b021c652-aa2f-4c53-b425-5090535a9345
 # ╠═cebb1a80-bf7d-11ee-264b-6195b4444d9d
+# ╠═824e29f9-20df-4d02-b294-df89ec706a6a
 # ╠═8a762b10-8695-46e3-bd64-f0e42b215b93
 # ╠═58316e4c-836e-4032-b035-a205f8d994d4
 # ╠═28287b56-95db-4058-b9bf-c530a236e532
