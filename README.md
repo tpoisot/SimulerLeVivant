@@ -13,7 +13,7 @@ Pour lancer les aide-mémoire / démonstrations:
 
 - [Modèle logistique](demonstrations/01_logistique.jl)
 - [*Game of Life* (v0)](demonstrations/02_gameoflife_v0.jl)
-- [*Game of Life* (v1)](demonstrations/03_gameoflife.jl)
+- [*Game of Life* (v1)](demonstrations/03_gameoflife_v1.jl)
 
 ## Liste des aide-mémoire
 
