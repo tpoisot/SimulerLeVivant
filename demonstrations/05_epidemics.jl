@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.38
+# v0.19.37
 
 using Markdown
 using InteractiveUtils
@@ -134,13 +134,38 @@ begin
 	current_figure()
 end
 
-# ╔═╡ 5111f7d5-2c35-4fa4-876b-d32872b0e380
-scatter([i[1] for i in I], [i[3] for i in I], markersize=3, color=:black, alpha=0.3)
+# ╔═╡ 7b6c1051-d9f3-4cf8-88d8-689ee4bc35ee
+around = 25
 
-# ╔═╡ be2a50ba-2ff2-423d-9260-85939b3a62be
-scatter(
-	[i[2] for i in I], [i[3] for i in I], [i[1] for i in I], markersize=1, color=:black, alpha=0.3
-)
+# ╔═╡ 68bad551-e15e-4892-8c02-1d15cf19d281
+md"""
+Reference timestep: $(@bind center PlutoUI.Slider(1:stats.duration; default=stats.maxwhen))
+"""
+
+# ╔═╡ 5111f7d5-2c35-4fa4-876b-d32872b0e380
+begin
+	f_tree = Figure()
+	axt = Axis(f_tree[1,1])
+	scatter!([i[1] for i in I], [i[3] for i in I], markersize=3, color=:black, alpha=0.3)
+	hlines!([center], color=:red)
+	hlines!([center+around, center-around], color=:red, linestyle=:dash)
+	current_figure()
+end
+
+# ╔═╡ 6305686b-7eff-4e53-91ad-f84ec9510763
+events_around = filter(x -> center-around <= x[3] <= center+around, I)
+
+# ╔═╡ e138f0d5-af8e-4076-8221-7e1fc7a6c24d
+begin
+	f_wave = Figure()
+	axw = Axis(f_wave[1,1]; aspect=DataAspect())
+	xlims!(axw, (0, grid_size[1]))
+	ylims!(axw, (0, grid_size[2]))
+	hidedecorations!(axw)
+	tw = scatter!(axw, [i[1] for i in events_around], [i[2] for i in events_around], color=([i[3] for i in events_around].-center)./(around), colormap=:managua, markersize=5)
+	Colorbar(f_wave[1,2], tw, label="Relative infection time")
+	current_figure()
+end
 
 # ╔═╡ 68b3b38e-c054-4b4c-afbf-649a54a4c749
 md"""
@@ -1882,8 +1907,11 @@ version = "3.5.0+0"
 # ╠═c319238b-5acc-4aad-821d-a6438eddefa5
 # ╠═e889ba59-24d9-454c-a53c-ee7a1df35769
 # ╟─dd0ec499-c27c-47a1-8511-e10df3d5fead
-# ╠═5111f7d5-2c35-4fa4-876b-d32872b0e380
-# ╠═be2a50ba-2ff2-423d-9260-85939b3a62be
+# ╟─5111f7d5-2c35-4fa4-876b-d32872b0e380
+# ╠═7b6c1051-d9f3-4cf8-88d8-689ee4bc35ee
+# ╟─68bad551-e15e-4892-8c02-1d15cf19d281
+# ╠═6305686b-7eff-4e53-91ad-f84ec9510763
+# ╟─e138f0d5-af8e-4076-8221-7e1fc7a6c24d
 # ╠═68b3b38e-c054-4b4c-afbf-649a54a4c749
 # ╠═d4cdca49-8b7d-46a0-98e5-330255e99c1a
 # ╠═702f4028-140f-421b-bebd-2dfb61b62010
