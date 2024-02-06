@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.37
+# v0.19.38
 
 using Markdown
 using InteractiveUtils
@@ -173,7 +173,7 @@ md"""
 """
 
 # ╔═╡ d4cdca49-8b7d-46a0-98e5-330255e99c1a
-n0s = repeat(round.(Int64, LinRange(500, 12000, 25)), outer=7)
+n0s = LinRange(500, 12000, 200)
 
 # ╔═╡ 702f4028-140f-421b-bebd-2dfb61b62010
 outputs = []
@@ -189,16 +189,31 @@ end
 # ╔═╡ ed895dc4-51fa-4318-a2b8-6e44ddbcae1c
 outputs
 
+# ╔═╡ 351e4d5a-5bcd-4812-a2fc-4650df4e8125
+md"""
+Axe x: $(@bind xscale Select([identity => "linear", log10 => "log 10"]))
+"""
+
+# ╔═╡ 2e9c0033-d2dd-4a82-94bc-666066f32859
+md"""
+Axe y:
+
+$(@bind yvar Select([
+	("Durée", [o.duration for o in outputs]) => "Durée",
+	("Max. prevalence", [o.peak for o in outputs]) => "Prévalence max.",
+]))
+"""
+
 # ╔═╡ 3bbc4593-4743-4f82-aacc-0f0678916b63
 begin
 	x = [o.popsize for o in outputs]./prod(grid_size)
-	y = [o.duration for o in outputs]
+	y = yvar[2]
 	s = [o.survival for o in outputs]
 	model = loess(x, y, span=0.5)
 	us = range(extrema(x)...; step = 0.01)
 	vs = predict(model, us)
 	f2 = Figure()
-	ax2 = Axis(f2[1,1]; xlabel="Population density")
+	ax2 = Axis(f2[1,1]; xlabel="Population density", ylabel=yvar[1], xscale=xscale)
 	cl = scatter!(ax2, x, y, color=s, colormap=:navia, colorrange=(0, 1))
 	lines!(us, vs, color=:lightgrey, linewidth=2, linestyle=:dash)
 	Colorbar(f2[1,2], cl; label="Survival rate")
@@ -1917,6 +1932,8 @@ version = "3.5.0+0"
 # ╠═702f4028-140f-421b-bebd-2dfb61b62010
 # ╠═75f43c3b-6654-4feb-a94a-a6189696cc87
 # ╠═ed895dc4-51fa-4318-a2b8-6e44ddbcae1c
+# ╟─351e4d5a-5bcd-4812-a2fc-4650df4e8125
+# ╠═2e9c0033-d2dd-4a82-94bc-666066f32859
 # ╠═3bbc4593-4743-4f82-aacc-0f0678916b63
 # ╠═5e246891-fcb5-48d9-8849-2cefb59865e1
 # ╠═6cf67c3b-e9c0-4347-bbc2-2425fc73b8a8
