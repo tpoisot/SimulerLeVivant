@@ -26,6 +26,7 @@ Pour lancer les aide-mémoire / démonstrations:
 ### Module sur les feux de forêt
 
 - [*Forest Fire Model*](demonstrations/04_forestfire.jl)
+- [*Forest Fire Model*](demonstrations/04a_forestfire_project.jl)  -- version pour le projet
 
 ## Liste des aide-mémoire
 
