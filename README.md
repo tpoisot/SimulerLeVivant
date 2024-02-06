@@ -40,3 +40,5 @@ Pour lancer les aide-mémoire / démonstrations:
 ### Concepts intermédiaires
 
 - [Modifier des vecteurs](aidememoire/05_push.jl)
+- [*Control flow*](aidememoire/06_flow.jl)
+- [Tuples](aidememoire/07_tuples.jl)
