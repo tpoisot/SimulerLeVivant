@@ -42,3 +42,7 @@ Pour lancer les aide-mémoire / démonstrations:
 - [Modifier des vecteurs](aidememoire/05_push.jl)
 - [*Control flow*](aidememoire/06_flow.jl)
 - [Tuples](aidememoire/07_tuples.jl)
+
+### Concepts avancés
+
+- [`map`/`filter`/`reduce`](aidememoire/08_mfr.jl)
