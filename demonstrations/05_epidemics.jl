@@ -58,6 +58,8 @@ function simulation!(population, moves, grid_size)
 	while infected > 0
 		for individual in population
 			move!(individual, moves, grid_size)
+		end
+		for individual in population
 			if individual.infected
 				individual.clock -= 1
 				# All individuals on same locations
@@ -134,38 +136,12 @@ begin
 	current_figure()
 end
 
-# ╔═╡ 7b6c1051-d9f3-4cf8-88d8-689ee4bc35ee
-around = 25
-
 # ╔═╡ 68bad551-e15e-4892-8c02-1d15cf19d281
 md"""
-Reference timestep: $(@bind center PlutoUI.Slider(1:stats.duration; default=stats.maxwhen))
+Reference timestep: $(@bind center PlutoUI.NumberField(1:stats.duration; default=stats.maxwhen))
+
+Sliding window width: $(@bind around PlutoUI.NumberField(1:50; default=25))
 """
-
-# ╔═╡ 5111f7d5-2c35-4fa4-876b-d32872b0e380
-begin
-	f_tree = Figure()
-	axt = Axis(f_tree[1,1])
-	scatter!([i[1] for i in I], [i[3] for i in I], markersize=3, color=:black, alpha=0.3)
-	hlines!([center], color=:red)
-	hlines!([center+around, center-around], color=:red, linestyle=:dash)
-	current_figure()
-end
-
-# ╔═╡ 6305686b-7eff-4e53-91ad-f84ec9510763
-events_around = filter(x -> center-around <= x[3] <= center+around, I)
-
-# ╔═╡ e138f0d5-af8e-4076-8221-7e1fc7a6c24d
-begin
-	f_wave = Figure()
-	axw = Axis(f_wave[1,1]; aspect=DataAspect())
-	xlims!(axw, (0, grid_size[1]))
-	ylims!(axw, (0, grid_size[2]))
-	hidedecorations!(axw)
-	tw = scatter!(axw, [i[1] for i in events_around], [i[2] for i in events_around], color=([i[3] for i in events_around].-center)./(around), colormap=:managua, markersize=5)
-	Colorbar(f_wave[1,2], tw, label="Relative infection time")
-	current_figure()
-end
 
 # ╔═╡ 68b3b38e-c054-4b4c-afbf-649a54a4c749
 md"""
@@ -222,6 +198,35 @@ end
 
 # ╔═╡ 6cf67c3b-e9c0-4347-bbc2-2425fc73b8a8
 CairoMakie.activate!(; px_per_unit = 2)
+
+# ╔═╡ 6305686b-7eff-4e53-91ad-f84ec9510763
+events_around = filter(x -> center-around <= x[3] <= center+around, I)
+
+# ╔═╡ e138f0d5-af8e-4076-8221-7e1fc7a6c24d
+begin
+	f_combined = Figure()
+	gl = f_combined[1,1] = GridLayout()
+	axt = Axis(gl[1,1])
+	axw = Axis(gl[1,2]; aspect=DataAspect())
+	scatter!(axt, [i[1] for i in I], [i[3] for i in I], markersize=3, color=:black, alpha=0.3)
+	hlines!(axt, [center], color=:red)
+	hlines!(axt, [center+around, center-around], color=:red, linestyle=:dash)
+
+	ylims!(axt, (0, stats.duration))
+	xlims!(axt, (0, grid_size[1]))
+
+	hidedecorations!(axt)
+	
+	xlims!(axw, (0, grid_size[1]))
+	ylims!(axw, (0, grid_size[2]))
+	hidedecorations!(axw)
+	tw = scatter!(axw, [i[1] for i in events_around], [i[2] for i in events_around], color=([i[3] for i in events_around].-center)./(around), colormap=:managua, markersize=5)
+
+	colsize!(gl, 1, Relative(0.3))
+	
+	Colorbar(f_combined[1,end+1], tw, label="Relative infection time")
+	current_figure()
+end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1914,7 +1919,7 @@ version = "3.5.0+0"
 # ╠═5920e367-67b0-4c6c-9ffb-ec594479b3cd
 # ╠═c317d977-9370-4df3-a94a-4777afc13be4
 # ╠═da26ab84-978c-47d9-adc2-71783e7ce763
-# ╟─097bc2d9-70cc-4c6d-a73f-a02e7975f2cd
+# ╠═097bc2d9-70cc-4c6d-a73f-a02e7975f2cd
 # ╟─6a14ec3f-e6ab-4016-9e4f-8b5195e18133
 # ╟─0569288f-6df7-4224-a9a2-d50c1d2a72fc
 # ╟─d4b312b8-c5ea-48af-8017-4d1b8b3c44d0
@@ -1922,10 +1927,7 @@ version = "3.5.0+0"
 # ╠═c319238b-5acc-4aad-821d-a6438eddefa5
 # ╠═e889ba59-24d9-454c-a53c-ee7a1df35769
 # ╟─dd0ec499-c27c-47a1-8511-e10df3d5fead
-# ╟─5111f7d5-2c35-4fa4-876b-d32872b0e380
-# ╠═7b6c1051-d9f3-4cf8-88d8-689ee4bc35ee
 # ╟─68bad551-e15e-4892-8c02-1d15cf19d281
-# ╠═6305686b-7eff-4e53-91ad-f84ec9510763
 # ╟─e138f0d5-af8e-4076-8221-7e1fc7a6c24d
 # ╠═68b3b38e-c054-4b4c-afbf-649a54a4c749
 # ╠═d4cdca49-8b7d-46a0-98e5-330255e99c1a
@@ -1939,5 +1941,6 @@ version = "3.5.0+0"
 # ╠═6cf67c3b-e9c0-4347-bbc2-2425fc73b8a8
 # ╠═0e760fcf-0a00-4837-a684-d7a17f6c7ec9
 # ╠═d2bfeec2-7739-43dd-960d-826d4f7db3c0
+# ╠═6305686b-7eff-4e53-91ad-f84ec9510763
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
