@@ -46,3 +46,4 @@ Pour lancer les aide-mémoire / démonstrations:
 ### Concepts avancés
 
 - [`map`/`filter`/`reduce`](aidememoire/08_mfr.jl)
+- [Créer de nouveaux types](aidememoire/09_struct.jl)
