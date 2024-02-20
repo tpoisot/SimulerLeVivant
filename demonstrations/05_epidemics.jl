@@ -126,9 +126,10 @@ stats = simstats(N, A, I)
 
 # ╔═╡ dd0ec499-c27c-47a1-8511-e10df3d5fead
 begin
-	f = Figure()
+	f = Figure(; resolution=(800, 800))
 	ax = Axis(f[1,1]; aspect=DataAspect())
 	hidedecorations!(ax)
+	hidespines!(ax)
 	cm = scatter!(ax, [i[1] for i in I], [i[2] for i in I], color=[i[3] for i in I], colormap=:lipari, colorrange=(1, maximum([i[3] for i in I])), markersize=5)
 	ylims!(ax, (1, grid_size[2]))
 	xlims!(ax, (1, grid_size[1]))
@@ -1926,7 +1927,9 @@ version = "3.5.0+0"
 # ╠═bf080841-393f-42a1-9de0-46ea6bd339eb
 # ╠═c319238b-5acc-4aad-821d-a6438eddefa5
 # ╠═e889ba59-24d9-454c-a53c-ee7a1df35769
-# ╟─dd0ec499-c27c-47a1-8511-e10df3d5fead
+# ╠═dd0ec499-c27c-47a1-8511-e10df3d5fead
+# ╟─5111f7d5-2c35-4fa4-876b-d32872b0e380
+# ╠═7b6c1051-d9f3-4cf8-88d8-689ee4bc35ee
 # ╟─68bad551-e15e-4892-8c02-1d15cf19d281
 # ╟─e138f0d5-af8e-4076-8221-7e1fc7a6c24d
 # ╠═68b3b38e-c054-4b4c-afbf-649a54a4c749

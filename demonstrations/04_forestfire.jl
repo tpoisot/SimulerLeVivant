@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.36
+# v0.19.37
 
 using Markdown
 using InteractiveUtils
@@ -31,7 +31,7 @@ Temps de simulation:
 """
 
 # ╔═╡ d4f5071b-514c-4315-ac8d-d58587d9728d
-temps_de_simulation = 1000
+temps_de_simulation = 2000
 
 # ╔═╡ e65f84b9-ceec-4bbb-af01-abb6920ddf7d
 md"""
@@ -104,7 +104,7 @@ Le comportement du modèle est influencé par le *ratio* des deux probabilités 
 """
 
 # ╔═╡ 630fb983-49d5-4bcc-903e-92f82bdcc18c
-ratio_feux = 140
+ratio_feux = 10_000
 
 # ╔═╡ 2f04d37d-e4b4-4433-bbb9-bcb3497a3a00
 md"""
@@ -203,7 +203,7 @@ forest_fire_colors = cgrad(
 
 # ╔═╡ 974a63e3-f2a8-42fc-ba00-21f8b94969ec
 begin
-	fig = Figure(; size = (600, 400))
+	fig = Figure(; size = (600, 300))
 	L_plot = Axis(fig[1, 1]; aspect=DataAspect())
 	S_plot = Axis(fig[1, 2]; aspect=DataAspect())
 	A_plot = Axis(fig[1, 3]; aspect=DataAspect())
