@@ -152,7 +152,7 @@ Sliding window width: $(@bind around PlutoUI.NumberField(1:50; default=25))
 
 # ╔═╡ 68b3b38e-c054-4b4c-afbf-649a54a4c749
 md"""
-## Longer simulations
+## Effet de la densité de population
 """
 
 # ╔═╡ d4cdca49-8b7d-46a0-98e5-330255e99c1a
@@ -1924,7 +1924,7 @@ version = "3.5.0+0"
 # ╠═e6045089-ddde-4b5d-8a18-3c7bd49f97bb
 # ╠═f99d36c5-6b83-4869-90b4-bce3396c7d2b
 # ╠═5920e367-67b0-4c6c-9ffb-ec594479b3cd
-# ╠═c317d977-9370-4df3-a94a-4777afc13be4
+# ╟─c317d977-9370-4df3-a94a-4777afc13be4
 # ╠═da26ab84-978c-47d9-adc2-71783e7ce763
 # ╟─097bc2d9-70cc-4c6d-a73f-a02e7975f2cd
 # ╟─6a14ec3f-e6ab-4016-9e4f-8b5195e18133
