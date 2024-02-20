@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.37
+# v0.19.38
 
 using Markdown
 using InteractiveUtils
@@ -118,25 +118,19 @@ the epidemic lasted for $(length(N)) clicks, and the survival rate is $(round((l
 
 # ╔═╡ d4b312b8-c5ea-48af-8017-4d1b8b3c44d0
 md"""
-the max. number of cases was $(maximum(A)), at time $(findmax(A)[2]), for a prevalence of $(round((findmax(A)[1]/N[findmax(A)[2]]); digits=5)*100)%
+the max. number of cases was $(maximum(A)), at time $(findmax(A)[2]), for a prevalence of $(round((findmax(A)[1]/N[findmax(A)[2]]); digits=5))%
 """
 
 # ╔═╡ e889ba59-24d9-454c-a53c-ee7a1df35769
 stats = simstats(N, A, I)
 
-# ╔═╡ 4be93158-98e8-4bf6-8f82-f51f83781478
-begin
-	lines(A./N, color=:red)
-	current_figure()
-end
-
 # ╔═╡ dd0ec499-c27c-47a1-8511-e10df3d5fead
 begin
-	f = Figure(; size=(800, 800))
+	f = Figure(; resolution=(800, 800))
 	ax = Axis(f[1,1]; aspect=DataAspect())
 	hidedecorations!(ax)
 	hidespines!(ax)
-	cm = scatter!(ax, [i[1] for i in I], [i[2] for i in I], color=[i[3] for i in I], colormap=:lipari, colorrange=(1, maximum([i[3] for i in I])), markersize=6)
+	cm = scatter!(ax, [i[1] for i in I], [i[2] for i in I], color=[i[3] for i in I], colormap=:lipari, colorrange=(1, maximum([i[3] for i in I])), markersize=5)
 	ylims!(ax, (1, grid_size[2]))
 	xlims!(ax, (1, grid_size[1]))
 	Colorbar(f[1,2], cm, label="Infection time")
@@ -174,7 +168,7 @@ outputs
 
 # ╔═╡ 351e4d5a-5bcd-4812-a2fc-4650df4e8125
 md"""
-Échelle x: $(@bind xscale Select([identity => "linéaire", log10 => "log 10", log2 => "log 2", sqrt => "Racine carrée"]))
+Axe x: $(@bind xscale Select([identity => "linear", log10 => "log 10"]))
 """
 
 # ╔═╡ 2e9c0033-d2dd-4a82-94bc-666066f32859
@@ -252,7 +246,7 @@ PlutoUI = "~0.7.55"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.1"
+julia_version = "1.10.0"
 manifest_format = "2.0"
 project_hash = "dc29b3e6bb2c020f8fcd2e42811082c57f4cf124"
 
@@ -485,7 +479,7 @@ weakdeps = ["Dates", "LinearAlgebra"]
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.1.0+0"
+version = "1.0.5+1"
 
 [[deps.ConstructionBase]]
 deps = ["LinearAlgebra"]
@@ -1245,7 +1239,7 @@ version = "1.3.5+1"
 [[deps.OpenBLAS_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
 uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
-version = "0.3.23+4"
+version = "0.3.23+2"
 
 [[deps.OpenEXR]]
 deps = ["Colors", "FileIO", "OpenEXR_jll"]
@@ -1926,18 +1920,19 @@ version = "3.5.0+0"
 # ╠═5920e367-67b0-4c6c-9ffb-ec594479b3cd
 # ╠═c317d977-9370-4df3-a94a-4777afc13be4
 # ╠═da26ab84-978c-47d9-adc2-71783e7ce763
-# ╟─097bc2d9-70cc-4c6d-a73f-a02e7975f2cd
+# ╠═097bc2d9-70cc-4c6d-a73f-a02e7975f2cd
 # ╟─6a14ec3f-e6ab-4016-9e4f-8b5195e18133
 # ╟─0569288f-6df7-4224-a9a2-d50c1d2a72fc
 # ╟─d4b312b8-c5ea-48af-8017-4d1b8b3c44d0
 # ╠═bf080841-393f-42a1-9de0-46ea6bd339eb
 # ╠═c319238b-5acc-4aad-821d-a6438eddefa5
 # ╠═e889ba59-24d9-454c-a53c-ee7a1df35769
-# ╟─4be93158-98e8-4bf6-8f82-f51f83781478
-# ╟─dd0ec499-c27c-47a1-8511-e10df3d5fead
+# ╠═dd0ec499-c27c-47a1-8511-e10df3d5fead
+# ╟─5111f7d5-2c35-4fa4-876b-d32872b0e380
+# ╠═7b6c1051-d9f3-4cf8-88d8-689ee4bc35ee
 # ╟─68bad551-e15e-4892-8c02-1d15cf19d281
 # ╟─e138f0d5-af8e-4076-8221-7e1fc7a6c24d
-# ╟─68b3b38e-c054-4b4c-afbf-649a54a4c749
+# ╠═68b3b38e-c054-4b4c-afbf-649a54a4c749
 # ╠═d4cdca49-8b7d-46a0-98e5-330255e99c1a
 # ╠═702f4028-140f-421b-bebd-2dfb61b62010
 # ╠═75f43c3b-6654-4feb-a94a-a6189696cc87
