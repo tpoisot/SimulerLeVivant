@@ -28,6 +28,10 @@ Pour lancer les aide-mémoire / démonstrations:
 - [*Forest Fire Model*](demonstrations/04_forestfire.jl)
 - [*Forest Fire Model*](demonstrations/04a_forestfire_project.jl)  -- version pour le projet
 
+### Module sur les épidémies
+
+- [Dynamique épidémiques](demonstrations/05_epidemics.jl)
+
 ## Liste des aide-mémoire
 
 ### Fondamentaux
