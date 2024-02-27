@@ -30,7 +30,8 @@ Pour lancer les aide-mémoire / démonstrations:
 
 ### Module sur les épidémies
 
-- [Dynamique épidémiques](demonstrations/05_epidemics.jl)
+- [Dynamique épidémiques](demonstrations/05_epidemics_v0.jl)
+- [Dynamique épidémiques](demonstrations/05a_epidemics_v1.jl) -- version pour le projet
 
 ## Liste des aide-mémoire
 
