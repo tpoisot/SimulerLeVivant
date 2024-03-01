@@ -13,7 +13,7 @@ mutable struct Force
 end
 
 repulsion = Force(5e-3, 1e-5)
-flocking = Force(0.1, 1.0)
+flocking = Force(1.0, 0.1)
 propulsion = Force(0.0, 10.0)
 stochasticity = Force(0.0, 0.1)
 
