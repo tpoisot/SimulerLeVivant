@@ -2,20 +2,20 @@ using Random
 using Distributions
 using CairoMakie
 
-number_of_agents = 150
+number_of_agents = 350
 iterations = 2_000
 timestep = 1e-2
-target_speed = 0.1
+target_speed = 0.01
 
 mutable struct Force
     r::Float64
     f::Float64
 end
 
-repulsion = Force(5e-3, 2e-1)
+repulsion = Force(5e-3, 1e-5)
 flocking = Force(0.1, 1.0)
 propulsion = Force(0.0, 10.0)
-stochasticity = Force(0.0, 0.5)
+stochasticity = Force(0.0, 0.1)
 
 mutable struct Fish
     x::Float64 # Position
