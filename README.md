@@ -33,6 +33,10 @@ Pour lancer les aide-mémoire / démonstrations:
 - [Dynamique épidémiques](demonstrations/05_epidemics_v0.jl)
 - [Dynamique épidémiques](demonstrations/05a_epidemics_v1.jl) -- version pour le projet
 
+### Module sur le mouvement
+
+- [Mouvement](demonstrations/06_mouvement.jl)
+
 ## Liste des aide-mémoire
 
 ### Fondamentaux
