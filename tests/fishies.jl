@@ -92,7 +92,7 @@ function forces!(school, repulsion, flocking, propulsion, stochasticity)
     end
 end
 
-phantoms = buffer(school, 0.1)
+
 
 # Figure with the buffer area around the fish
 [(fish.x, fish.y) for fish in school] |> scatter
