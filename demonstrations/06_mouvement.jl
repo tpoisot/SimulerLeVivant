@@ -13,23 +13,48 @@ using Distributions
 # ╔═╡ 968bf441-3eed-40cc-9d32-8af0bedb82c5
 using CairoMakie
 
+# ╔═╡ 581ae871-8546-4470-bddf-a94d1013d472
+using ProgressLogging
+
 # ╔═╡ 797f0023-9d0d-486b-acab-9f566d2914e9
-number_of_agents = 350
+number_of_agents = 50
 
 # ╔═╡ 88d5d7da-e27a-40dd-b246-9559aa5ba081
-iterations = 1_000
+iterations = 600
 
 # ╔═╡ 9b8f82a3-cc72-4cad-bc82-3c73607914b4
-timestep = 1e-2
+timestep = 1e-1
 
 # ╔═╡ 0740ec89-f0e5-4189-bb37-e0d5639821af
-target_speed = 0.01
+target_speed = 0.05
 
-# ╔═╡ 629147df-e2f1-49f3-886b-a28208015ac9
-mutable struct Force
-    r::Float64
-    f::Float64
+# ╔═╡ 6a33dbc9-8c58-4562-b4c8-9bb41710544d
+clicks = round(Int, iterations * (1 / timestep))
+
+# ╔═╡ 8bb5d51a-ff6c-41c8-acec-922697638801
+plot_size = (3, 3)
+
+# ╔═╡ d1d2d668-9a30-4df8-9ab8-50bd42acb80e
+plot_at = round.(Int, LinRange(0, clicks, prod(plot_size)))
+
+# ╔═╡ c859a8a5-e41b-49c9-9be5-0f2a416fb1e7
+begin
+	fig = Figure()
+	fig_axs = [Axis(fig[i,j]; aspect=DataAspect()) for i in 1:plot_size[1], j in 1:plot_size[2]]
+	for fig_ax in fig_axs
+		xlims!(fig_ax, (0.0, 1.0))
+		ylims!(fig_ax, (0.0, 1.0))
+		hidedecorations!(fig_ax)
+	end
 end
+
+# ╔═╡ cd6e8c72-e361-4168-bf50-0b73ce5f2900
+fig
+
+# ╔═╡ 6ba2ffe8-ae41-44f7-a118-b8ea657cf7d9
+md"""
+## Types
+"""
 
 # ╔═╡ 6e127724-e2bd-431f-9ee4-d34c490e53f0
 mutable struct Fish
@@ -39,6 +64,22 @@ mutable struct Fish
     vy::Float64
     fx::Float64 # Total forces
     fy::Float64
+end
+
+# ╔═╡ 52e30db0-592f-4df8-9d9a-b0ddf3ccde51
+school = [
+    Fish(
+        rand(), rand(),
+        rand(Uniform(-1, 1)), rand(Uniform(-1, 1)),
+        0.0, 0.0
+    )
+    for _ in Base.OneTo(number_of_agents)
+]
+
+# ╔═╡ 629147df-e2f1-49f3-886b-a28208015ac9
+mutable struct Force
+    r::Float64
+    f::Float64
 end
 
 # ╔═╡ d8fd5bc8-28f2-4029-9641-d258e6357ff4
@@ -53,15 +94,23 @@ propulsion = Force(0.0, 10.0)
 # ╔═╡ 801ca5b2-ddd5-4612-a3d6-e4b2b4ef18b4
 stochasticity = Force(0.0, 0.1)
 
-# ╔═╡ 52e30db0-592f-4df8-9d9a-b0ddf3ccde51
-school = [
-    Fish(
-        rand(), rand(),
-        rand(Uniform(-1, 1)), rand(Uniform(-1, 1)),
-        0.0, 0.0
-    )
-    for _ in Base.OneTo(number_of_agents)
-]
+# ╔═╡ f21a979a-56b8-4672-845e-1d5b4243b50d
+md"""
+## Fonctions pour le mouvement
+"""
+
+# ╔═╡ c04d6f21-f87e-44a0-9ef4-e802f8881f50
+function update!(school, timestep)
+    for fish in school
+        fish.vx += fish.fx * timestep
+        fish.x += fish.vx * timestep
+        fish.x = (1 + fish.x) % 1.0
+        fish.vy += fish.fy * timestep
+        fish.y += fish.vy * timestep
+        fish.y = (1 + fish.y) % 1.0
+    end
+	return school
+end
 
 # ╔═╡ 1b386959-8dc6-4c13-9f03-2a6ba0492b26
 begin
@@ -88,6 +137,15 @@ function buffer(school, radius)
     return phantoms
 end
 
+# ╔═╡ 52177c23-91cb-4b1c-90d0-ed122a2b5150
+begin
+	# Figure with the buffer area around the fish
+	scatter([(fish.x, fish.y) for fish in school], color=:black)
+	scatter!([(phantom.x, phantom.y) for phantom in buffer(school, 0.5)], color=:grey)
+	hidedecorations!(current_axis())
+	current_figure()
+end
+
 # ╔═╡ 22b99454-a9a7-4593-9625-08071e07212f
 function forces!(school, repulsion, flocking, propulsion, stochasticity)
     buffer_radius = max(repulsion.r, flocking.r)
@@ -100,7 +158,7 @@ function forces!(school, repulsion, flocking, propulsion, stochasticity)
                 fx += distal.vx
                 fy += distal.vy
                 n += 1
-                if (d2 <= 4 * repulsion.r^2)
+                if (d2 <= (4 * repulsion.r^2))
                     d = sqrt(d2)
                     rx += repulsion.f * exp(1 - d / (2 * repulsion.f))^1.5 * (focal.x - distal.x) / d
                     ry += repulsion.f * exp(1 - d / (2 * repulsion.f))^1.5 * (focal.y - distal.y) / d
@@ -123,40 +181,21 @@ function forces!(school, repulsion, flocking, propulsion, stochasticity)
     end
 end
 
-# ╔═╡ 7fbd21ee-eaf5-4de7-9398-9b34faece978
-phantoms = buffer(school, 0.1)
-
-# ╔═╡ 52177c23-91cb-4b1c-90d0-ed122a2b5150
-begin
-	# Figure with the buffer area around the fish
-	[(fish.x, fish.y) for fish in school] |> scatter
-	[(phantom.x, phantom.y) for phantom in phantoms] |> scatter!
-	current_figure()
-end
-
-# ╔═╡ c859a8a5-e41b-49c9-9be5-0f2a416fb1e7
-begin
-	fig = Figure()
-	ax = Axis(fig[1, 1]; aspect=DataAspect())
-	pldt = scatter!(ax, [(fish.x, fish.y) for fish in school], color=:black)
-	xlims!(ax, (0.0, 1.0))
-	ylims!(ax, (0.0, 1.0))
-	hidedecorations!(ax)
-	current_figure()
-end
-
-# ╔═╡ be985012-76c4-436f-9710-4e07b25679c6
-record(fig, "swimming.mp4", Base.OneTo(iterations); framerate=30) do iteration
-    forces!(school, repulsion, flocking, propulsion, stochasticity)
-    for fish in school
-        fish.vx += fish.fx * timestep
-        fish.x += fish.vx * timestep
-        fish.x = (1 + fish.x) % 1.0
-        fish.vy += fish.fy * timestep
-        fish.y += fish.vy * timestep
-        fish.y = (1 + fish.y) % 1.0
-    end
-    pldt[1] = [(fish.x, fish.y) for fish in school]
+# ╔═╡ 4678d96a-6bd8-41d5-a054-efd7a967b38d
+@progress for i in Base.OneTo(clicks)
+	if i == 1
+		empty!(fig_axs[1])
+		fig_axs[1].title = "t ≈ 0.0"
+		arrows!(fig_axs[1], [fish.x for fish in school], [fish.y for fish in school], [fish.vx for fish in school], [fish.vy for fish in school])
+	end
+	forces!(school, repulsion, flocking, propulsion, stochasticity)
+	update!(school, timestep)
+	if i in plot_at
+		plot_position = findfirst(isequal(i), plot_at)
+		empty!(fig_axs[plot_position])
+		fig_axs[plot_position].title = "t ≈ $(round(i*timestep; digits=1))"
+		arrows!(fig_axs[plot_position], [fish.x for fish in school], [fish.y for fish in school], [fish.vx for fish in school], [fish.vy for fish in school])
+	end
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -164,11 +203,13 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+ProgressLogging = "33c8b6b6-d38a-422a-b730-caa89a2f386c"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [compat]
 CairoMakie = "~0.11.9"
 Distributions = "~0.25.107"
+ProgressLogging = "~0.1.4"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -177,7 +218,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.10.2"
 manifest_format = "2.0"
-project_hash = "3b727d737dafe5ae1606bd8dc44cdd04fa59c8ef"
+project_hash = "c1a58858f35a14fc00f110258398975146617cf4"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -1295,6 +1336,12 @@ uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 deps = ["Printf"]
 uuid = "9abbd945-dff8-562f-b5e8-e1ebf5ef1b79"
 
+[[deps.ProgressLogging]]
+deps = ["Logging", "SHA", "UUIDs"]
+git-tree-sha1 = "80d919dee55b9c50e8d9e2da5eeafff3fe58b539"
+uuid = "33c8b6b6-d38a-422a-b730-caa89a2f386c"
+version = "0.1.4"
+
 [[deps.ProgressMeter]]
 deps = ["Distributed", "Printf"]
 git-tree-sha1 = "763a8ceb07833dd51bb9e3bbca372de32c0605ad"
@@ -1789,23 +1836,30 @@ version = "3.5.0+0"
 # ╠═96b56fe8-e553-11ee-3c9d-3db5934b1693
 # ╠═23be4441-cbaa-4683-8c99-dd4532de40ff
 # ╠═968bf441-3eed-40cc-9d32-8af0bedb82c5
+# ╠═581ae871-8546-4470-bddf-a94d1013d472
 # ╠═797f0023-9d0d-486b-acab-9f566d2914e9
 # ╠═88d5d7da-e27a-40dd-b246-9559aa5ba081
 # ╠═9b8f82a3-cc72-4cad-bc82-3c73607914b4
 # ╠═0740ec89-f0e5-4189-bb37-e0d5639821af
-# ╠═629147df-e2f1-49f3-886b-a28208015ac9
-# ╠═6e127724-e2bd-431f-9ee4-d34c490e53f0
 # ╠═d8fd5bc8-28f2-4029-9641-d258e6357ff4
 # ╠═cbba4022-9668-47c6-9c6a-6ecb40988df2
 # ╠═92458967-b140-45ac-aa5a-9a32e9cfe6b8
 # ╠═801ca5b2-ddd5-4612-a3d6-e4b2b4ef18b4
 # ╠═52e30db0-592f-4df8-9d9a-b0ddf3ccde51
+# ╠═52177c23-91cb-4b1c-90d0-ed122a2b5150
+# ╠═6a33dbc9-8c58-4562-b4c8-9bb41710544d
+# ╠═8bb5d51a-ff6c-41c8-acec-922697638801
+# ╠═d1d2d668-9a30-4df8-9ab8-50bd42acb80e
+# ╠═c859a8a5-e41b-49c9-9be5-0f2a416fb1e7
+# ╠═4678d96a-6bd8-41d5-a054-efd7a967b38d
+# ╠═cd6e8c72-e361-4168-bf50-0b73ce5f2900
+# ╟─6ba2ffe8-ae41-44f7-a118-b8ea657cf7d9
+# ╠═6e127724-e2bd-431f-9ee4-d34c490e53f0
+# ╠═629147df-e2f1-49f3-886b-a28208015ac9
+# ╟─f21a979a-56b8-4672-845e-1d5b4243b50d
+# ╠═c04d6f21-f87e-44a0-9ef4-e802f8881f50
 # ╠═1b386959-8dc6-4c13-9f03-2a6ba0492b26
 # ╠═4ef63718-712e-4a67-a6d6-fcb00fe15f2b
 # ╠═22b99454-a9a7-4593-9625-08071e07212f
-# ╠═7fbd21ee-eaf5-4de7-9398-9b34faece978
-# ╠═52177c23-91cb-4b1c-90d0-ed122a2b5150
-# ╠═c859a8a5-e41b-49c9-9be5-0f2a416fb1e7
-# ╠═be985012-76c4-436f-9710-4e07b25679c6
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
