@@ -13,33 +13,30 @@ using Distributions
 # ╔═╡ 968bf441-3eed-40cc-9d32-8af0bedb82c5
 using CairoMakie
 
+# ╔═╡ b7bf82c2-d816-4e42-aa9c-d45f5f42ade4
+using Statistics
+
 # ╔═╡ 581ae871-8546-4470-bddf-a94d1013d472
 using ProgressLogging
 
 # ╔═╡ 797f0023-9d0d-486b-acab-9f566d2914e9
-number_of_agents = 250
+number_of_agents = 150
 
 # ╔═╡ 88d5d7da-e27a-40dd-b246-9559aa5ba081
-iterations = 5
-
-# ╔═╡ 9b8f82a3-cc72-4cad-bc82-3c73607914b4
-timestep = 1e-2
-
-# ╔═╡ 0740ec89-f0e5-4189-bb37-e0d5639821af
-target_speed = 0.0
+iterations, timestep = 5, 1e-2
 
 # ╔═╡ 6a33dbc9-8c58-4562-b4c8-9bb41710544d
 clicks = round(Int, iterations * (1 / timestep))
 
 # ╔═╡ 8bb5d51a-ff6c-41c8-acec-922697638801
-plot_size = (3, 3)
+plot_size = (3,3)
 
 # ╔═╡ d1d2d668-9a30-4df8-9ab8-50bd42acb80e
 plot_at = round.(Int, LinRange(0, clicks, prod(plot_size)))
 
 # ╔═╡ c859a8a5-e41b-49c9-9be5-0f2a416fb1e7
 begin
-	fig = Figure()
+	fig = Figure(; size=(900, 900))
 	fig_axs = [Axis(fig[i,j]; aspect=DataAspect()) for i in 1:plot_size[1], j in 1:plot_size[2]]
 	for fig_ax in fig_axs
 		xlims!(fig_ax, (0.0, 1.0))
@@ -57,32 +54,29 @@ md"""
 """
 
 # ╔═╡ 6e127724-e2bd-431f-9ee4-d34c490e53f0
-mutable struct Fish
-    x::Float64 # Position
-    y::Float64
-    vx::Float64 # Velocity
-    vy::Float64
-    fx::Float64 # Total forces
-    fy::Float64
+Base.@kwdef mutable struct Fish
+    x::Float64 = rand() # Position
+    y::Float64 = rand()
+    vx::Float64 = 0.1rand()-0.05 # Velocity
+    vy::Float64 = 0.1rand()-0.05
+    fx::Float64 = 0.0 # Total forces
+    fy::Float64 = 0.0
+	repulsion::Float64 = 0.0
+	repulsion_radius::Float64 = 0.0
+	flocking::Float64 = 1.0
+	flocking_radius::Float64 = 0.1
+	propulsion::Float64 = 10.0
+	stochasticity::Float64 = 0.1
+	target_speed::Float64 = 0.0
 end
 
-# ╔═╡ 629147df-e2f1-49f3-886b-a28208015ac9
-mutable struct Force
-    r::Float64
-    f::Float64
+# ╔═╡ f87bbb2f-8456-4363-b45d-d7403b117dd0
+function movefish(fish; x::Float64=fish.x, y::Float64=fish.y)
+	newfish = deepcopy(fish)
+	newfish.x = x
+	newfish.y = y
+	return newfish
 end
-
-# ╔═╡ d8fd5bc8-28f2-4029-9641-d258e6357ff4
-repulsion = Force(0.0, 0.0)
-
-# ╔═╡ cbba4022-9668-47c6-9c6a-6ecb40988df2
-flocking = Force(0.1, 1.0)
-
-# ╔═╡ 92458967-b140-45ac-aa5a-9a32e9cfe6b8
-propulsion = Force(0.0, 10.0)
-
-# ╔═╡ 801ca5b2-ddd5-4612-a3d6-e4b2b4ef18b4
-stochasticity = Force(0.0, 0.1)
 
 # ╔═╡ f21a979a-56b8-4672-845e-1d5b4243b50d
 md"""
@@ -102,32 +96,34 @@ function update!(school, timestep)
 	return school
 end
 
+# ╔═╡ 344ae87b-244a-437c-a0b2-83f3f8bbab03
+function speeds(school)
+	raw = [sqrt(fish.vx^2 + fish.vy^2) for fish in school]
+	return clamp.((raw .- mean(raw)) ./ std(raw), -0.1, 0.1)
+end
+
 # ╔═╡ 1b386959-8dc6-4c13-9f03-2a6ba0492b26
 begin
-	leftfish(fish, radius) = fish.x <= radius ? Fish(fish.x + 1, fish.y, fish.vx, fish.vy, 0.0, 0.0) : nothing
-rightfish(fish, radius) = fish.x >= 1.0 - radius ? Fish(fish.x - 1, fish.y, fish.vx, fish.vy, 0.0, 0.0) : nothing
-bottomfish(fish, radius) = fish.y <= radius ? Fish(fish.x, fish.y + 1, fish.vx, fish.vy, 0.0, 0.0) : nothing
-topfish(fish, radius) = fish.y >= 1.0 - radius ? Fish(fish.x, fish.y - 1, fish.vx, fish.vy, 0.0, 0.0) : nothing
-bottomleftfish(fish, radius) = (fish.y <= radius) & (fish.x <= radius) ? Fish(fish.x + 1, fish.y + 1, fish.vx, fish.vy, 0.0, 0.0) : nothing
-bottomrightfish(fish, radius) = (fish.y <= radius) & (fish.x >= 1 - radius) ? Fish(fish.x - 1, fish.y + 1, fish.vx, fish.vy, 0.0, 0.0) : nothing
-topleftfish(fish, radius) = (fish.y >= 1 - radius) & (fish.x <= radius) ? Fish(fish.x + 1, fish.y - 1, fish.vx, fish.vy, 0.0, 0.0) : nothing
-toprightfish(fish, radius) = (fish.y >= 1 - radius) & (fish.x >= 1 - radius) ? Fish(fish.x - 1, fish.y - 1, fish.vx, fish.vy, 0.0, 0.0) : nothing
+leftfish(fish, radius) = fish.x <= radius ? movefish(fish, x=fish.x + 1, y=fish.y) : nothing
+rightfish(fish, radius) = fish.x >= 1.0 - radius ? movefish(fish, x=fish.x - 1, y=fish.y) : nothing
+bottomfish(fish, radius) = fish.y <= radius ? movefish(fish, x=fish.x, y=fish.y + 1) : nothing
+topfish(fish, radius) = fish.y >= 1.0 - radius ? movefish(fish, x=fish.x, y=fish.y - 1) : nothing
+bottomleftfish(fish, radius) = (fish.y <= radius) & (fish.x <= radius) ? movefish(fish, x=fish.x + 1, y=fish.y + 1) : nothing
+bottomrightfish(fish, radius) = (fish.y <= radius) & (fish.x >= 1 - radius) ? movefish(fish, x=fish.x - 1, y=fish.y + 1) : nothing
+topleftfish(fish, radius) = (fish.y >= 1 - radius) & (fish.x <= radius) ? movefish(fish, x=fish.x + 1, y=fish.y - 1) : nothing
+toprightfish(fish, radius) = (fish.y >= 1 - radius) & (fish.x >= 1 - radius) ? movefish(fish, x=fish.x - 1, y=fish.y - 1) : nothing
 end
 
 # ╔═╡ 4dab8eb2-e2aa-4115-9788-dcd86d7a224f
-function generate_school(n, s)
+function generate_school(n; kwargs...)
 	return [
-    Fish(
-        rand(), rand(),
-        rand(Uniform(-s, s)), rand(Uniform(-s, s)),
-        0.0, 0.0
-    )
+    Fish(; kwargs...)
     for _ in Base.OneTo(n)
 ]
 end
 
 # ╔═╡ 52e30db0-592f-4df8-9d9a-b0ddf3ccde51
-school = generate_school(number_of_agents, stochasticity.f)
+school = generate_school(number_of_agents)
 
 # ╔═╡ 4ef63718-712e-4a67-a6d6-fcb00fe15f2b
 function buffer(school, radius)
@@ -146,39 +142,44 @@ end
 begin
 	# Figure with the buffer area around the fish
 	scatter([(fish.x, fish.y) for fish in school], color=:blue)
-	scatter!([(phantom.x, phantom.y) for phantom in buffer(school, 0.1)], color=:orange)
+	scatter!([(phantom.x, phantom.y) for phantom in buffer(school, 0.2)], color=:orange)
 	hidedecorations!(current_axis())
 	current_figure()
 end
 
 # ╔═╡ 22b99454-a9a7-4593-9625-08071e07212f
-function forces!(school, repulsion, flocking, propulsion, stochasticity)
-    buffer_radius = max(repulsion.r, flocking.r)
+function forces!(school)
+	
+	buffer_radius = maximum([max(fish.repulsion_radius, fish.flocking_radius) for fish in school])
     phantoms = buffer(school, buffer_radius)
+	
     for (j, focal) in enumerate(school)
         rx, ry, fx, fy, n = 0.0, 0.0, 0.0, 0.0, 0
         for (k, distal) in enumerate(vcat(school, phantoms))
-            d2 = (focal.x - distal.x)^2 + (focal.y - distal.y)^2
-            if (d2 <= flocking.r^2) & (j != k)
-                fx += distal.vx
-                fy += distal.vy
-                n += 1
-                if (d2 <= (4 * repulsion.r^2))
-                    d = sqrt(d2)
-                    rx += repulsion.f * exp(1 - d / (2 * repulsion.f))^1.5 * (focal.x - distal.x) / d
-                    ry += repulsion.f * exp(1 - d / (2 * repulsion.f))^1.5 * (focal.y - distal.y) / d
-                end
-            end
+			if j != k
+	            d2 = (focal.x - distal.x)^2 + (focal.y - distal.y)^2
+	            if (d2 <= (focal.flocking_radius^2))
+	                fx += distal.vx
+	                fy += distal.vy
+	                n += 1
+	            end
+				if (d2 <= (4 * distal.repulsion_radius^2))
+	                d = sqrt(d2)
+	                rx += distal.repulsion * exp(1 - d / (2 * distal.repulsion))^1.5 * (focal.x - distal.x) / d
+	                ry += distal.repulsion * exp(1 - d / (2 * distal.repulsion))^1.5 * (focal.y - distal.y) / d
+	            end
+			end
         end
+		
         norm = n > 0 ? sqrt(fx^2 + fy^2) : 1.0
-        fx = flocking.f * fx / norm
-        fy = flocking.f * fy / norm
+        fx = focal.flocking * fx / norm
+        fy = focal.flocking * fy / norm
 
         vnorm = sqrt(focal.vx^2 + focal.vy^2)
-        px = propulsion.f * (target_speed - vnorm) * (focal.vx / vnorm)
-        py = propulsion.f * (target_speed - vnorm) * (focal.vy / vnorm)
+        px = focal.propulsion * (focal.target_speed - vnorm) * (focal.vx / vnorm)
+        py = focal.propulsion * (focal.target_speed - vnorm) * (focal.vy / vnorm)
 
-        sx, sy = stochasticity.f .* rand(Uniform(-1, 1), 2)
+        sx, sy = focal.stochasticity .* rand(Uniform(-1, 1), 2)
 
         focal.fx = fx + sx + px + rx
         focal.fy = fy + sy + py + ry
@@ -189,18 +190,18 @@ end
 # ╔═╡ 4678d96a-6bd8-41d5-a054-efd7a967b38d
 @progress for i in Base.OneTo(clicks)
 	if i == 1
-		school = generate_school(number_of_agents, stochasticity.f)
+		school = generate_school(number_of_agents)
 		empty!(fig_axs[1])
 		fig_axs[1].title = "t ≈ 0.0"
-		arrows!(fig_axs[1], [fish.x for fish in school], [fish.y for fish in school], [fish.vx for fish in school], [fish.vy for fish in school], alpha=0.5)
+		arrows!(fig_axs[1], [fish.x for fish in school], [fish.y for fish in school], [0.4fish.vx for fish in school], [0.4fish.vy for fish in school], alpha=0.5, color=speeds(school), colormap=:managua)
 	end
-	forces!(school, repulsion, flocking, propulsion, stochasticity)
+	forces!(school)
 	update!(school, timestep)
 	if i in plot_at
 		plot_position = findfirst(isequal(i), plot_at)
 		empty!(fig_axs[plot_position])
 		fig_axs[plot_position].title = "t ≈ $(round(i*timestep; digits=1))"
-		arrows!(fig_axs[plot_position], [fish.x for fish in school], [fish.y for fish in school], [fish.vx for fish in school], [fish.vy for fish in school], alpha=0.5)
+		arrows!(fig_axs[plot_position], [fish.x for fish in school], [fish.y for fish in school], [0.4fish.vx for fish in school], [0.4fish.vy for fish in school], alpha=0.5, color=speeds(school), colormap=:managua)
 	end
 end
 
@@ -211,6 +212,7 @@ CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 ProgressLogging = "33c8b6b6-d38a-422a-b730-caa89a2f386c"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
 [compat]
 CairoMakie = "~0.11.9"
@@ -224,7 +226,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.10.2"
 manifest_format = "2.0"
-project_hash = "c1a58858f35a14fc00f110258398975146617cf4"
+project_hash = "63d30c9415d308db5dd999ed57b45b8f2418cea4"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -1842,15 +1844,10 @@ version = "3.5.0+0"
 # ╠═96b56fe8-e553-11ee-3c9d-3db5934b1693
 # ╠═23be4441-cbaa-4683-8c99-dd4532de40ff
 # ╠═968bf441-3eed-40cc-9d32-8af0bedb82c5
+# ╠═b7bf82c2-d816-4e42-aa9c-d45f5f42ade4
 # ╠═581ae871-8546-4470-bddf-a94d1013d472
 # ╠═797f0023-9d0d-486b-acab-9f566d2914e9
 # ╠═88d5d7da-e27a-40dd-b246-9559aa5ba081
-# ╠═9b8f82a3-cc72-4cad-bc82-3c73607914b4
-# ╠═0740ec89-f0e5-4189-bb37-e0d5639821af
-# ╠═d8fd5bc8-28f2-4029-9641-d258e6357ff4
-# ╠═cbba4022-9668-47c6-9c6a-6ecb40988df2
-# ╠═92458967-b140-45ac-aa5a-9a32e9cfe6b8
-# ╠═801ca5b2-ddd5-4612-a3d6-e4b2b4ef18b4
 # ╠═52e30db0-592f-4df8-9d9a-b0ddf3ccde51
 # ╠═52177c23-91cb-4b1c-90d0-ed122a2b5150
 # ╠═6a33dbc9-8c58-4562-b4c8-9bb41710544d
@@ -1861,9 +1858,10 @@ version = "3.5.0+0"
 # ╠═cd6e8c72-e361-4168-bf50-0b73ce5f2900
 # ╟─6ba2ffe8-ae41-44f7-a118-b8ea657cf7d9
 # ╠═6e127724-e2bd-431f-9ee4-d34c490e53f0
-# ╠═629147df-e2f1-49f3-886b-a28208015ac9
+# ╠═f87bbb2f-8456-4363-b45d-d7403b117dd0
 # ╟─f21a979a-56b8-4672-845e-1d5b4243b50d
 # ╠═c04d6f21-f87e-44a0-9ef4-e802f8881f50
+# ╠═344ae87b-244a-437c-a0b2-83f3f8bbab03
 # ╠═1b386959-8dc6-4c13-9f03-2a6ba0492b26
 # ╠═4dab8eb2-e2aa-4115-9788-dcd86d7a224f
 # ╠═4ef63718-712e-4a67-a6d6-fcb00fe15f2b

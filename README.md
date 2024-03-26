@@ -36,6 +36,7 @@ Pour lancer les aide-mémoire / démonstrations:
 ### Module sur le mouvement
 
 - [Mouvement](demonstrations/06_mouvement.jl)
+- [Mouvement](demonstrations/06a_mouvement.jl) -- version pour le projet
 
 ## Liste des aide-mémoire
 
