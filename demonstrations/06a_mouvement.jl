@@ -20,7 +20,7 @@ using Statistics
 using ProgressLogging
 
 # ╔═╡ 797f0023-9d0d-486b-acab-9f566d2914e9
-number_of_agents = 150
+number_of_agents = 340
 
 # ╔═╡ 88d5d7da-e27a-40dd-b246-9559aa5ba081
 iterations, timestep = 5, 1e-2
@@ -43,6 +43,13 @@ begin
 		ylims!(fig_ax, (0.0, 1.0))
 		hidedecorations!(fig_ax)
 	end
+end
+
+# ╔═╡ ed36dd16-f9f0-4654-baf9-aa13156b777d
+begin
+	parameters_shared = (repulsion_radius = 0.025, repulsion = 2.5, flocking_radius = 0.1, propulsion = 10.)
+	parameters_slow = (parameters_shared..., flocking=1.0, target_speed = 0.02, stochasticity = 0.1)
+	parameters_fast = (parameters_shared..., flocking=0.1, target_speed = 0.1, stochasticity = 8.0)
 end
 
 # ╔═╡ cd6e8c72-e361-4168-bf50-0b73ce5f2900
@@ -70,14 +77,6 @@ Base.@kwdef mutable struct Fish
 	target_speed::Float64 = 0.0
 end
 
-# ╔═╡ f87bbb2f-8456-4363-b45d-d7403b117dd0
-function movefish(fish; x::Float64=fish.x, y::Float64=fish.y)
-	newfish = deepcopy(fish)
-	newfish.x = x
-	newfish.y = y
-	return newfish
-end
-
 # ╔═╡ f21a979a-56b8-4672-845e-1d5b4243b50d
 md"""
 ## Fonctions pour le mouvement
@@ -102,6 +101,25 @@ function speeds(school)
 	return clamp.((raw .- mean(raw)) ./ std(raw), -0.1, 0.1)
 end
 
+# ╔═╡ 4dab8eb2-e2aa-4115-9788-dcd86d7a224f
+function generate_school(n; kwargs...)
+	return [
+    Fish(; kwargs...)
+    for _ in Base.OneTo(n)
+]
+end
+
+# ╔═╡ 52e30db0-592f-4df8-9d9a-b0ddf3ccde51
+school = generate_school(number_of_agents)
+
+# ╔═╡ f87bbb2f-8456-4363-b45d-d7403b117dd0
+function movefish(fish; x::Float64=fish.x, y::Float64=fish.y)
+	newfish = deepcopy(fish)
+	newfish.x = x
+	newfish.y = y
+	return newfish
+end
+
 # ╔═╡ 1b386959-8dc6-4c13-9f03-2a6ba0492b26
 begin
 leftfish(fish, radius) = fish.x <= radius ? movefish(fish, x=fish.x + 1, y=fish.y) : nothing
@@ -113,17 +131,6 @@ bottomrightfish(fish, radius) = (fish.y <= radius) & (fish.x >= 1 - radius) ? mo
 topleftfish(fish, radius) = (fish.y >= 1 - radius) & (fish.x <= radius) ? movefish(fish, x=fish.x + 1, y=fish.y - 1) : nothing
 toprightfish(fish, radius) = (fish.y >= 1 - radius) & (fish.x >= 1 - radius) ? movefish(fish, x=fish.x - 1, y=fish.y - 1) : nothing
 end
-
-# ╔═╡ 4dab8eb2-e2aa-4115-9788-dcd86d7a224f
-function generate_school(n; kwargs...)
-	return [
-    Fish(; kwargs...)
-    for _ in Base.OneTo(n)
-]
-end
-
-# ╔═╡ 52e30db0-592f-4df8-9d9a-b0ddf3ccde51
-school = generate_school(number_of_agents)
 
 # ╔═╡ 4ef63718-712e-4a67-a6d6-fcb00fe15f2b
 function buffer(school, radius)
@@ -190,10 +197,20 @@ end
 # ╔═╡ 4678d96a-6bd8-41d5-a054-efd7a967b38d
 @progress for i in Base.OneTo(clicks)
 	if i == 1
-		school = generate_school(number_of_agents)
+		school = generate_school(number_of_agents-1)
+		predateur = Fish()
+		push!(school, predateur)
+		#fraction_slow = 0.99
+		#n_slow = ceil(Int, fraction_slow * number_of_agents)
+		#n_fast = number_of_agents - n_slow
+		#slow = generate_school(n_slow; parameters_slow...)
+		#fast = generate_school(n_fast; parameters_fast...)
+		#school = vcat(slow, fast)
+		#
 		empty!(fig_axs[1])
 		fig_axs[1].title = "t ≈ 0.0"
-		arrows!(fig_axs[1], [fish.x for fish in school], [fish.y for fish in school], [0.4fish.vx for fish in school], [0.4fish.vy for fish in school], alpha=0.5, color=speeds(school), colormap=:managua)
+		arrows!(fig_axs[1], [fish.x for fish in school], [fish.y for fish in school], [0.2fish.vx for fish in school], [0.2fish.vy for fish in school], alpha=0.5, color=speeds(school), colormap=:berlin)
+		scatter!(fig_axs[1], [last(school).x], [last(school).y], color=:red)
 	end
 	forces!(school)
 	update!(school, timestep)
@@ -201,7 +218,8 @@ end
 		plot_position = findfirst(isequal(i), plot_at)
 		empty!(fig_axs[plot_position])
 		fig_axs[plot_position].title = "t ≈ $(round(i*timestep; digits=1))"
-		arrows!(fig_axs[plot_position], [fish.x for fish in school], [fish.y for fish in school], [0.4fish.vx for fish in school], [0.4fish.vy for fish in school], alpha=0.5, color=speeds(school), colormap=:managua)
+		arrows!(fig_axs[plot_position], [fish.x for fish in school], [fish.y for fish in school], [0.2fish.vx for fish in school], [0.2fish.vy for fish in school], alpha=0.5, color=speeds(school), colormap=:berlin)
+		scatter!(fig_axs[plot_position], [last(school).x], [last(school).y], color=:red)
 	end
 end
 
@@ -1854,17 +1872,18 @@ version = "3.5.0+0"
 # ╠═8bb5d51a-ff6c-41c8-acec-922697638801
 # ╠═d1d2d668-9a30-4df8-9ab8-50bd42acb80e
 # ╠═c859a8a5-e41b-49c9-9be5-0f2a416fb1e7
+# ╠═ed36dd16-f9f0-4654-baf9-aa13156b777d
 # ╠═4678d96a-6bd8-41d5-a054-efd7a967b38d
 # ╠═cd6e8c72-e361-4168-bf50-0b73ce5f2900
 # ╟─6ba2ffe8-ae41-44f7-a118-b8ea657cf7d9
 # ╠═6e127724-e2bd-431f-9ee4-d34c490e53f0
-# ╠═f87bbb2f-8456-4363-b45d-d7403b117dd0
 # ╟─f21a979a-56b8-4672-845e-1d5b4243b50d
 # ╠═c04d6f21-f87e-44a0-9ef4-e802f8881f50
 # ╠═344ae87b-244a-437c-a0b2-83f3f8bbab03
-# ╠═1b386959-8dc6-4c13-9f03-2a6ba0492b26
 # ╠═4dab8eb2-e2aa-4115-9788-dcd86d7a224f
-# ╠═4ef63718-712e-4a67-a6d6-fcb00fe15f2b
-# ╠═22b99454-a9a7-4593-9625-08071e07212f
+# ╟─4ef63718-712e-4a67-a6d6-fcb00fe15f2b
+# ╟─22b99454-a9a7-4593-9625-08071e07212f
+# ╟─f87bbb2f-8456-4363-b45d-d7403b117dd0
+# ╟─1b386959-8dc6-4c13-9f03-2a6ba0492b26
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
