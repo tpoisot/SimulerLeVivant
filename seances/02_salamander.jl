@@ -85,7 +85,7 @@ end
 """
     afficher_matrice(matrice)
 
-Affiche une matrice de cellules, où les cellules activées sont représentées par 'X' et les cellules désactivées par un espace.
+Affiche une matrice de cellules, où les cellules activées sont représentées par '█' et les cellules désactivées par un espace.
 
 Arguments:
 - `matrice::Array{Bool, 2}`: Matrice de cellules à afficher
@@ -97,7 +97,7 @@ function afficher_matrice(matrice)
     for i in 1:size(matrice, 1)
         for j in 1:size(matrice, 2)
             if matrice[i, j] == 1
-                print("X")
+                print("█")
             else
                 print(" ")
             end
@@ -108,12 +108,12 @@ end
 
 # Variables
 wa = 1.0  # Poids de l'activation
-wi = 0.15  # Poids de l'inhibition
+wi = 0.12  # Poids de l'inhibition
 Ra = 2  # Rayon d'activation
 Ri = 8  # Rayon d'inhibition
 
-lignes = 35  # Nombre de lignes dans la grille
-colonnes = 35  # Nombre de colonnes dans la grille
+lignes = 45  # Nombre de lignes dans la grille
+colonnes = 95  # Nombre de colonnes dans la grille
 
 p_activation = 0.1  # Probabilité d'activation initiale
 temps = 100  # Nombre de générations à simuler
@@ -133,6 +133,7 @@ for gen in 1:temps
             inhibition = nombre_voisins(lattice, row, col, Ri)
             # Détermination du nouvel état de la cellule
             temps_suivant[row, col] = nouvel_etat(activation, inhibition, wa, wi)
+        end
     end
     for i in 1:lignes
         for j in 1:colonnes
