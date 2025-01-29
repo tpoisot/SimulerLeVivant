@@ -15,5 +15,9 @@
 2. Si le voisinnage n'est pas un carré mais un cercle (en utilisant p.ex. la distance de Manhattan), à  quoi ressemblent les tâches?
 3. Si les cellules peuvent prendre un état intermédiaire avant de devenir pygmentées, est-ce que les tâches sont différentes? (plus difficile!)
 
-## Séance 3 - fourmis
+## Séance 3 - génétique des populations
+
+
+
+## Séance 4 - fourmis
 
