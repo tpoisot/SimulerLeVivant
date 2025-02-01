@@ -25,7 +25,7 @@ function random_choice_weighted(choices, weights)
     end
 end
 
-points = 55
+points = 50
 
 P = zeros(Float64, points, points)
 D = zeros(Float64, points, points)
@@ -85,11 +85,11 @@ function pheromones!(P, chemin, D)
     return P
 end
 
-track = zeros(Float64, 200)
+track = zeros(Float64, 120)
 
 @showprogress for i in 1:length(track)
 
-    chemins = [walk_on_graph(D, P, rand(1:points)) for i in 1:10points]
+    chemins = [walk_on_graph(D, P, rand(1:points)) for _ in 1:10points]
 
     # Remove the chemins with more than the median chemin_distance
     distances = [chemin_distance(chemin, D) for chemin in chemins]
@@ -107,12 +107,6 @@ track = zeros(Float64, 200)
 
 end
 
-# Plotting the points and lines colored by the value of P
-fig = Figure(size=(1000, 400))
-ax = Axis(fig[1, 1], aspect=1)
-ax2 = Axis(fig[1,2], yscale=sqrt)
-lines!(ax2, track, color=:black, linewidth=2)
-
 # Collect all lines with their P values
 lines_data = []
 for i in 1:points
@@ -126,15 +120,21 @@ end
 # Sort lines by P values
 sorted_lines = sort(lines_data, by=x -> x[3])
 
-# Plot lines with the highest P values last
-max_P = maximum(P)
+# Plotting the points and lines colored by the value of P
+fig = Figure(size=(600, 680))
+gl = fig[1,1] = GridLayout()
+ax = Axis(gl[1, 1], aspect=1)
+ax2 = Axis(gl[2,1], yscale=sqrt)
+lines!(ax2, track, color=:purple, linewidth=2)
+hidedecorations!(ax2)
+
 for (i, j, p_val) in sorted_lines
-    z_val = p_val / max_P
-    lines!(ax, [xy[1, i], xy[1, j]], [xy[2, i], xy[2, j]], color=log1p.(z_val), colormap=:Blues, colorrange=log1p.(extrema(P)))
+    lines!(ax, [xy[1, i], xy[1, j]], [xy[2, i], xy[2, j]], color=log1p(p_val), colormap=:Purples, colorrange=log1p.(extrema(P)))
 end
 
 scatter!(ax, xy[1, :], xy[2, :], color=:black)
 hidespines!(ax)
 hidedecorations!(ax)
 
+rowsize!(gl, 2, Relative(0.2))
 fig
