@@ -1,94 +1,76 @@
 using Random
+using StatsBase
 using CairoMakie
-using Printf
+using ProgressMeter
+using Statistics
 
 CairoMakie.activate!(px_per_unit = 6.0)
 
+
+# Conversion des fréquences
+frequences_genotypes(p, q) = [p*p, 2*p*q, q*q]
+frequences_genotypes(p) = frequences_genotypes(p, 1-p)
+
+function drift(ft, Ne)
+    gen = sample(1:length(ft), Weights(ft), Ne; replace=true)
+    return [sum(gen .== i) / length(gen) for i in eachindex(ft)]
+end
+
+function simulate(p, s, gen, Ne)
+    pop = zeros(Float64, length(s), gen)
+    pop[:,1] = frequences_genotypes(p)
+    w = 1.0 .+ s
+    for i in 2:gen
+        wt = drift(pop[:,(i-1)], Ne) .* w
+        wbar = sum(wt)
+        #pop[:,i] = drift(wt./wbar, Ne)
+        pop[:,i] = wt./wbar
+    end
+    return pop
+end
+
 # Paramètres
-alleles = ('a', 'A')
-p = 0.5  # Fréquence de l'allèle 'A'
-q = 1 - p  # Fréquence de l'allèle 'a'
-generations = 2000  # Nombre de générations à simuler
-population_size = 2000  # Taille de la population
+p = 0.3  # Fréquence de l'allèle 'A'
+generations = 500
+Ne = 2_000
+s = [0.005, -0.01, 0.005] # AA, Aa, aa
 
-# Coefficients de sélection
-s_AA = -0.08  # Coefficient de sélection pour AA
-s_Aa = 0.02 # Coefficient de sélection pour Aa
-s_aa = 0.00  # Coefficient de sélection pour aa
+S = simulate(p, s, generations, Ne)
 
-# Fonction pour simuler une génération sous sélection
-function hardy_weinberg_selection(p, q, s_AA, s_Aa, s_aa)
-    # Fréquences génotypiques sans sélection
-    AA = p^2
-    Aa = 2 * p * q
-    aa = q^2
-
-    # Appliquer la sélection
-    w_AA = 1 + s_AA
-    w_Aa = 1 + s_Aa
-    w_aa = 1 + s_aa
-
-    # Fitness moyenne
-    w_bar = AA * w_AA + Aa * w_Aa + aa * w_aa
-
-    # Fréquences génotypiques ajustées
-    AA = (AA * w_AA) / w_bar
-    Aa = (Aa * w_Aa) / w_bar
-    aa = (aa * w_aa) / w_bar
-
-    return (AA, Aa, aa, w_bar)
-end
-
-# Tableau pour stocker les fréquences génotypiques au fil du temps
-genotype_frequencies = zeros(Float64, generations + 1, 3)
-genotype_frequencies[1, :] .= hardy_weinberg_selection(p, q, s_AA, s_Aa, s_aa)[1:3]
-
-# Simuler au fil des générations
-for gen in 1:generations
-    p = genotype_frequencies[gen, 1] + 0.5 * genotype_frequencies[gen, 2]
-    q = 1 - p
-
-    # Ajouter la dérive génétique
-    num_A = sum(rand() < p for _ in 1:population_size)
-    p = num_A / population_size
-    q = 1 - p
-
-    genotype_frequencies[gen + 1, :] .= hardy_weinberg_selection(p, q, s_AA, s_Aa, s_aa)[1:3]
-end
-
-# on this line only, write code to get the fitness over time in a vector
-average_fitness = [hardy_weinberg_selection(sqrt(genotype_frequencies[gen, 1]) + 0.5 * genotype_frequencies[gen, 2], 1 - (sqrt(genotype_frequencies[gen, 1]) + 0.5 * genotype_frequencies[gen, 2]), s_AA, s_Aa, s_aa)[4] for gen in 1:generations+1]
-
-# Tracé
-fig = Figure(size = (800, 600))
-ax = Axis(fig[1, 1], title = "Fréquences génotypiques au fil des générations avec sélection et dérive", xlabel = "Génération", ylabel = "Fréquence")
-
-# Tracer les surfaces remplies pour chaque génotype
-gen_range = 0:generations
-AA_freq = genotype_frequencies[:, 1]
-Aa_freq = genotype_frequencies[:, 2]
-aa_freq = genotype_frequencies[:, 3]
-
-# Calculate cumulative frequencies for stacked bands
-Aa_cumulative = AA_freq + Aa_freq
-aa_cumulative = Aa_cumulative + aa_freq
-
-# Plot stacked bands
-b1 = band!(ax, gen_range, 0, AA_freq, color = (:blue, 0.5), label = "AA")
-b2 = band!(ax, gen_range, AA_freq, Aa_cumulative, color = (:orange, 0.5), label = "Aa")
-b3 = band!(ax, gen_range, Aa_cumulative, aa_cumulative, color = (:purple, 0.5), label = "aa")
-
-lines!(ax, gen_range, AA_freq, color=:black, linewidth=0.5)
-lines!(ax, gen_range, Aa_cumulative, color=:black, linewidth=0.5)
-
-# Create and position the legend
-Legend(fig[1, 2], ax)
-
-ax2 = Axis(fig[2, 1])
-lines!(ax2, gen_range, average_fitness)
-
-
+fig = Figure(size=(700, 300))
+ax = Axis(fig[1,1]; xlabel="Génération", ylabel="Fréquence")
+lines!(ax, S[1,:], label="AA")
+lines!(ax, S[2,:], label="Aa")
+lines!(ax, S[3,:], label="aa")
+ylims!(ax, 0, 1)
 tightlimits!(ax)
-tightlimits!(ax2)
+Legend(fig[1,2], ax)
 fig
 
+# Replicates, pop size
+replicates = 400
+popsizes = 20
+Ns = ceil.(Int64, logrange(100, 10_000, popsizes))
+results = zeros(Float64, replicates, popsizes)
+
+@showprogress for replicate in axes(results, 1)
+    for i in axes(results, 2)
+        S = simulate(p, s, generations, Ns[i])
+        results[replicate, i] = S[2,end]
+    end
+end
+
+# Treatment
+M = vec(mean(results; dims=1))
+Q10 = [quantile(results[:,i], [0.1])[1] for i in axes(results, 2)]
+Q90 = [quantile(results[:,i], [0.9])[1] for i in axes(results, 2)]
+
+fig2 = Figure()
+ax = Axis(fig2[1,1], xscale=log10)
+band!(ax, Ns, Q10, Q90, color=:grey, alpha=0.5)
+scatter!(ax, Ns, M, color=:black)
+lines!(ax, Ns, Q10, color=:black, linestyle=:dash)
+lines!(ax, Ns, Q90, color=:black, linestyle=:dash)
+ylims!(ax, 0, 1)
+tightlimits!(ax)
+fig2
