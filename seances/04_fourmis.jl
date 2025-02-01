@@ -1,5 +1,7 @@
 using CairoMakie
 using Statistics
+using ProgressMeter
+CairoMakie.activate!(px_per_unit = 6.0)
 
 function disposition_points(n)
     angles = rand(n) .* 2π
@@ -23,7 +25,7 @@ function random_choice_weighted(choices, weights)
     end
 end
 
-points = 15
+points = 55
 
 P = zeros(Float64, points, points)
 D = zeros(Float64, points, points)
@@ -83,9 +85,9 @@ function pheromones!(P, chemin, D)
     return P
 end
 
-track = zeros(Float64, 100)
+track = zeros(Float64, 200)
 
-for i in 1:length(track)
+@showprogress for i in 1:length(track)
 
     chemins = [walk_on_graph(D, P, rand(1:points)) for i in 1:10points]
 
@@ -105,11 +107,11 @@ for i in 1:length(track)
 
 end
 
-scatter(track)
-
 # Plotting the points and lines colored by the value of P
 fig = Figure()
-ax = Axis(fig[1, 1])
+ax = Axis(fig[1, 1], aspect=1)
+ax2 = Axis(f[1,2])
+lines!(ax2, track)
 
 # Collect all lines with their P values
 lines_data = []
@@ -128,10 +130,11 @@ sorted_lines = sort(lines_data, by=x -> x[3])
 max_P = maximum(P)
 for (i, j, p_val) in sorted_lines
     z_val = p_val / max_P
-    lines!(ax, [xy[1, i], xy[1, j]], [xy[2, i], xy[2, j]], color=log1p.(z_val), colormap=:Blues, colorrange=extrema(P))
+    lines!(ax, [xy[1, i], xy[1, j]], [xy[2, i], xy[2, j]], color=log1p.(z_val), colormap=:Oranges, colorrange=log1p.(extrema(P)))
 end
 
 scatter!(ax, xy[1, :], xy[2, :], color=:black)
+hidespines!(ax)
+hidedecorations!(ax)
 
 fig
-
