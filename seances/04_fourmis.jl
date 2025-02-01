@@ -5,7 +5,7 @@ CairoMakie.activate!(px_per_unit = 6.0)
 
 function disposition_points(n)
     angles = rand(n) .* 2π
-    radii = sqrt.(rand(length(angles)) .* 5.0)
+    radii = sqrt.(rand(length(angles)) .* 3.0 .+ 1.0)
     x = cos.(angles) .* radii
     y = sin.(angles) .* radii
 
@@ -108,10 +108,10 @@ track = zeros(Float64, 200)
 end
 
 # Plotting the points and lines colored by the value of P
-fig = Figure()
+fig = Figure(size=(1000, 400))
 ax = Axis(fig[1, 1], aspect=1)
-ax2 = Axis(f[1,2])
-lines!(ax2, track)
+ax2 = Axis(fig[1,2], yscale=sqrt)
+lines!(ax2, track, color=:black, linewidth=2)
 
 # Collect all lines with their P values
 lines_data = []
@@ -130,7 +130,7 @@ sorted_lines = sort(lines_data, by=x -> x[3])
 max_P = maximum(P)
 for (i, j, p_val) in sorted_lines
     z_val = p_val / max_P
-    lines!(ax, [xy[1, i], xy[1, j]], [xy[2, i], xy[2, j]], color=log1p.(z_val), colormap=:Oranges, colorrange=log1p.(extrema(P)))
+    lines!(ax, [xy[1, i], xy[1, j]], [xy[2, i], xy[2, j]], color=log1p.(z_val), colormap=:Blues, colorrange=log1p.(extrema(P)))
 end
 
 scatter!(ax, xy[1, :], xy[2, :], color=:black)
