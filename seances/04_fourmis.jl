@@ -1,6 +1,7 @@
 using CairoMakie
 using Statistics
 using ProgressMeter
+using StatsBase
 CairoMakie.activate!(px_per_unit = 6.0)
 
 function disposition_points(n)
@@ -11,18 +12,6 @@ function disposition_points(n)
 
     stops = permutedims(hcat(x, y))
     return stops
-end
-
-function random_choice_weighted(choices, weights)
-    total_weight = sum(weights)
-    rand_val = rand() * total_weight
-    cumulative_weight = 0.0
-    for (choice, weight) in zip(choices, weights)
-        cumulative_weight += weight
-        if rand_val < cumulative_weight
-            return choice
-        end
-    end
 end
 
 points = 50
@@ -51,8 +40,8 @@ function walk_on_graph(D, P, i)
     chemin = [i]
 
     while sum(visites) != n_sites
-        voisins = []
-        cible = []
+        voisins = Int64[]
+        cible = Float64[]
         for voisin in setdiff(1:n_sites, chemin)
             pheromones = max(P[last(chemin), voisin], 1e-5)
             poids = (pheromones^α)/D[last(chemin), voisin]^β
@@ -60,7 +49,7 @@ function walk_on_graph(D, P, i)
             push!(voisins, voisin)
         end
         
-        next_site = random_choice_weighted(voisins, cible)
+        next_site = sample(voisins, Weights(cible))
         push!(chemin, next_site)
         visites[next_site] = true
     end
