@@ -1,21 +1,24 @@
 using Random
 using Statistics
 
-# Vous devrez installer ces deux packages
+# Vous devrez installer ces trois packages
+# Étape 1 (dans le terminal): ] (pour ouvrir le mode pkg>)
+# Étape 2: activate .
+# Étape 3: add StatsBase
+# Étape 4: backspace pour revenir au mode julia>
 using StatsBase
 using CairoMakie
 using ProgressMeter
 
 CairoMakie.activate!(px_per_unit = 6.0)
 
-
 # Conversion des fréquences
 frequences_genotypes(p, q) = [p*p, 2*p*q, q*q]
 frequences_genotypes(p) = frequences_genotypes(p, 1-p)
 
 function drift(ft, Ne)
-    gen = sample(1:length(ft), Weights(ft), Ne; replace=true)
-    return [sum(gen .== i) / length(gen) for i in eachindex(ft)]
+    # Documentation: StatsBase.sample
+    return ft
 end
 
 function simulate(p, s, gen, Ne)
