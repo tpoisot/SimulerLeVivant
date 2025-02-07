@@ -1,16 +1,18 @@
+using ProgressMeter
 using CairoMakie
 CairoMakie.activate!(; px_per_unit=2)
 
-grid_size = (550, 450)
-epochs = 1:100
-forest = zeros(Int64, grid_size);
-forestchange = zeros(Int64, grid_size);
+W = 100
+H = 200
+T = 1000
+forest = zeros(UInt8, T, W, H)
 
-fire_state_palette = cgrad([:white, :orange, :green], 3; categorical = true)
+fire_state_palette = cgrad([:white, :orange, :green], 3; categorical=true)
 
-p = 1e-2
-S = 230
-f = p * (1 / S)
+pt = 1e-2
+pc = 0.1
+S = 130
+pf = pt * (1 / S)
 
 function neighborsof(x, y, sx, sy)
     nx = [x - 1, x, x + 1]
@@ -19,41 +21,59 @@ function neighborsof(x, y, sx, sy)
     ny[1] = iszero(ny[1]) ? sy : ny[1]
     nx[3] = (nx[3] == sx + 1) ? 1 : nx[3]
     ny[3] = (ny[3] == sy + 1) ? 1 : ny[3]
-    return [(i, j) for i in nx for j in ny if i != j]
+    return [(i, j) for i in nx for j in ny]
 end
 
-function grow_cluster!(forest, i, j, ptree)
+function cluster!(forest, i, j, p)
     ns = neighborsof(i, j, size(forest)...)
     for n in ns
-        if rand() <= ptree
-            forest[n...] = 2
-            grow_cluster!(forest, n..., ptree)
+        if forest[n...] == 0
+            if rand() <= p
+                forest[n...] = 2
+                cluster!(forest, n..., p)
+            end
         end
     end
     return forest
 end
 
-function plant!(forest, pcluster, ptree)
+function initial!(forest, pc, tr)
     for i in axes(forest, 1)
         for j in axes(forest, 2)
-            if forest[i, j] != 2
-                if rand() < pcluster
-                    forest[i, j] = 2
-                    grow_cluster!(forest, i, j, ptree)
-                end
+            if rand() < pc
+                forest[i, j] = 2
+                cluster!(forest, i, j, pt / pc)
             end
         end
     end
+    return forest
 end
 
-function spread!(forest)
-    for i in axes(forest, 1)
-        for j in axes(forest, 2)
-            if forest[i, j] == 1
-                forest[i, j] = 0
-                for n in neighborsof(i, j, size(forest)...)
-                    if forest[n...] == 2
-                        forest[n...] = 1
+initial!(view(forest, 1, :, :), pc, pt)
+heatmap(forest[1, :, :])
+
+@showprogress for t in 1:(T-1)
+    current = view(forest, t, :, :)
+    future = view(forest, t + 1, :, :)
+    for i in axes(current, 1)
+        for j in axes(current, 2)
+            if current[i, j] == 2
+                if rand() <= pf
+                    future[i, j] = 1
+                else
+                    future[i, j] = 2
+                    for n in neighborsof(i, j, size(current)...)
+                        if rand() <= pt
+                            future[n...] = 2
+                        end
+                    end
+                end
+            end
+            if current[i, j] == 1
+                future[i, j] == 0
+                for n in neighborsof(i, j, size(future)...)
+                    if future[n...] == 2
+                        future[n...] = 1
                     end
                 end
             end
@@ -61,37 +81,7 @@ function spread!(forest)
     end
 end
 
-function grow!(forest, ptree)
-    for i in axes(forest, 1)
-        for j in axes(forest, 2)
-            if forest[i, j] == 2
-                grow_cluster!(forest, i, j, ptree)
-            end
-        end
-    end
-end
-
-function zap!(forest, pfire)
-    for i in axes(forest, 1)
-        for j in axes(forest, 2)
-            if forest[i, j] == 2
-                forest[i, j] = rand() < pfire ? 1 : 2
-            end
-        end
-    end
-end
-
-# Initial
-plant!(forest, 0.04, 0.1)
-heatmap(forest, colormap=fire_state_palette)
-
-plant!(forest, 0.01, p)
-
-grow!(forest, p)
-heatmap(forest, colormap=fire_state_palette)
-
-zap!(forest, f)
-heatmap(forest, colormap=fire_state_palette)
-
-spread!(forest)
-heatmap(forest, colormap=fire_state_palette)
+fig = Figure()
+ax = Axis(fig[1,1], aspect=DataAspect())
+heatmap!(ax, forest[T,:,:], colormap=fire_state_palette)
+current_figure()
