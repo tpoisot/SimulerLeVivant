@@ -1,17 +1,18 @@
 using ProgressMeter
+using Random
 using CairoMakie
 CairoMakie.activate!(; px_per_unit=2)
 
-W = 100
-H = 200
-T = 1000
+W = 550
+H = 550
+T = 200
 forest = zeros(UInt8, T, W, H)
 
 fire_state_palette = cgrad([:white, :orange, :green], 3; categorical=true)
 
-pt = 1e-2
-pc = 0.1
-S = 130
+pt = 5e-3
+pc = 0.05
+S = 630
 pf = pt * (1 / S)
 
 function neighborsof(x, y, sx, sy)
@@ -21,7 +22,7 @@ function neighborsof(x, y, sx, sy)
     ny[1] = iszero(ny[1]) ? sy : ny[1]
     nx[3] = (nx[3] == sx + 1) ? 1 : nx[3]
     ny[3] = (ny[3] == sy + 1) ? 1 : ny[3]
-    return [(i, j) for i in nx for j in ny]
+    return shuffle!([(i, j) for i in nx for j in ny])
 end
 
 function cluster!(forest, i, j, p)
@@ -64,11 +65,17 @@ heatmap(forest[1, :, :])
                     future[i, j] = 2
                     for n in neighborsof(i, j, size(current)...)
                         if rand() <= pt
-                            future[n...] = 2
+                            if future[n...] == 0
+                                future[n...] = 2
+                            end
                         end
                     end
                 end
             end
+        end
+    end
+    for i in axes(current, 1)
+        for j in axes(current, 2)
             if current[i, j] == 1
                 future[i, j] == 0
                 for n in neighborsof(i, j, size(future)...)
@@ -79,9 +86,22 @@ heatmap(forest[1, :, :])
             end
         end
     end
+    for i in axes(current, 1)
+        for j in axes(current, 2)
+            if future[i, j] == 0
+                if rand() <= pt
+                    future[i ,j] = 2
+                end
+            end
+        end
+    end
 end
 
-fig = Figure()
-ax = Axis(fig[1,1], aspect=DataAspect())
-heatmap!(ax, forest[T,:,:], colormap=fire_state_palette)
-current_figure()
+fig = Figure(size=(400, 400))
+ax = Axis(fig[1, 1], aspect=DataAspect())
+hidedecorations!(ax)
+hm = heatmap!(ax, forest[1, :, :], colormap=fire_state_palette)
+for i in 1:200
+    hm[3].val .= forest[i, :, :]
+    display(fig)
+end
