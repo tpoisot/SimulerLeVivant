@@ -12,7 +12,7 @@ fire_state_palette = cgrad([:white, :orange, :green], 3; categorical=true)
 
 pt = 5e-3
 pc = 0.05
-S = 630
+S = 130
 pf = pt * (1 / S)
 
 function neighborsof(x, y, sx, sy)
