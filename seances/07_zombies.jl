@@ -71,8 +71,8 @@ lines(S)
 lines!(I)
 current_figure()
 
+t = [e[1] for e in events]
 x = [e[2] for e in events]
 y = [e[3] for e in events]
-t = [e[1] for e in events]
 
-scatter(x, y, color=t, colormap=:navia)
+scatter(x, y, color=t, colormap=:lipari)
