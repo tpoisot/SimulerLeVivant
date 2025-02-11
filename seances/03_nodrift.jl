@@ -18,7 +18,10 @@ frequences_genotypes(p) = frequences_genotypes(p, 1-p)
 
 function drift(ft, Ne)
     # Documentation: StatsBase.sample
-    return ft
+    genotypes = ["AA", "Aa", "aa"]
+    nouvelle_population = sample(genotypes, ft, Ne; replace=true)
+    N = [count(nouvelle_population .== genotype) for genotype in genotypes]
+    return N./Ne
 end
 
 function simulate(p, s, gen, Ne)

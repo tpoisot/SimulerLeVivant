@@ -14,7 +14,7 @@ function disposition_points(n)
     return stops
 end
 
-points = 50
+points = 70
 
 P = zeros(Float64, points, points)
 D = zeros(Float64, points, points)
@@ -75,10 +75,12 @@ function pheromones!(P, chemin, D)
 end
 
 track = zeros(Float64, 120)
+n_fourmis = 50
+evaporation_rate = 0.9
 
 @showprogress for i in 1:length(track)
 
-    chemins = [walk_on_graph(D, P, rand(1:points)) for _ in 1:10points]
+    chemins = [walk_on_graph(D, P, rand(1:points)) for _ in 1:n_fourmis]
 
     # Remove the chemins with more than the median chemin_distance
     distances = [chemin_distance(chemin, D) for chemin in chemins]
@@ -90,7 +92,7 @@ track = zeros(Float64, 120)
     end
     P ./= length(chemins)
     #P .+= rand(size(P)).*0.02 .- 0.01
-    P .*= 0.9
+    P .*= evaporation_rate
 
     track[i] = minimum(distances)
 
