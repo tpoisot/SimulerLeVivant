@@ -14,7 +14,7 @@ function disposition_points(n)
     return stops
 end
 
-points = 70
+points = 100
 
 P = zeros(Float64, points, points)
 D = zeros(Float64, points, points)
@@ -56,11 +56,39 @@ function walk_on_graph(D, P, i)
     return chemin
 end
 
+"""
+    chemin_distance(chemin, D)
+
+Distance totale du chemin, incluant le retour au point initial
+
+- `chemin`: vecteur de positions qui indique l'ordre de visite des sites 
+- `D`: matrice de distance entre les sites
+"""
 function chemin_distance(chemin, D)
+    # d représente la distance pour revenir au début du cycle
+    #
+    # on veut créer un circuit, et le chemin s'arrête au dernier
+    # site visité
+    # 
+    # le chemin indique l'ordre de visite des sites
+    #
+    # D est la matrice de distance entre tous les points
     d = D[chemin[end], chemin[begin]]
+    
+    # on va calculer la distance totale du reste de chemin
+    # on a deja la distance du retour vers le premier site
     for i in 2:length(chemin)
+        # on lit dans D la distance entre
+        # le site visité à la position i
+        # et le site visité juste avant (position i-1)
+        #
+        # on ajouter cette distance à d
         d += D[chemin[i-1], chemin[i]]
     end
+    
+    # d contient la distance totale du cycle
+    # distance du chemin + distance du retour au premier point
+    # on renvoie d
     return d
 end
 
