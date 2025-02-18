@@ -1,6 +1,7 @@
 using CairoMakie
 using Distributions
 using LinearAlgebra
+using ProgressMeter
 
 # States
 # Barren
@@ -25,7 +26,7 @@ patches = 1000
 generations = 600
 timeseries = zeros(Float64, length(s), generations)
 timeseries[:,1] = s
-for i in 2:generations
+@showprogress for i in 2:generations
     newstate = (timeseries[:,(i-1)]' * Tm)'
     if !isinf(patches)
         M = Multinomial(patches, newstate)
