@@ -2,7 +2,7 @@ using CairoMakie
 CairoMakie.activate!(; px_per_unit = 2)
 using ProgressMeter
 
-grid_size = (500, 500)
+grid_size = (300, 300)
 
 forest = zeros(Int64, grid_size .+ 2);
 forestchange = zeros(Int64, grid_size .+ 2);
