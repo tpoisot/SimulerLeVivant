@@ -1,107 +1,93 @@
-using ProgressMeter
-using Random
 using CairoMakie
-CairoMakie.activate!(; px_per_unit=2)
+CairoMakie.activate!(; px_per_unit = 2)
+using ProgressMeter
 
-W = 550
-H = 550
-T = 200
-forest = zeros(UInt8, T, W, H)
+grid_size = (500, 500)
 
-fire_state_palette = cgrad([:white, :orange, :green], 3; categorical=true)
+forest = zeros(Int64, grid_size .+ 2);
+forestchange = zeros(Int64, grid_size .+ 2);
 
-pt = 5e-3
-pc = 0.05
+p = 1e-2
 S = 130
-pf = pt * (1 / S)
+f = p * (1 / S)
 
-function neighborsof(x, y, sx, sy)
-    nx = [x - 1, x, x + 1]
-    ny = [y - 1, y, y + 1]
-    nx[1] = iszero(nx[1]) ? sx : nx[1]
-    ny[1] = iszero(ny[1]) ? sy : ny[1]
-    nx[3] = (nx[3] == sx + 1) ? 1 : nx[3]
-    ny[3] = (ny[3] == sy + 1) ? 1 : ny[3]
-    return shuffle!([(i, j) for i in nx for j in ny])
+locations_to_plant = filter(i -> rand() <= p, eachindex(forest[2:(end - 1), 2:(end - 1)]))
+forest[locations_to_plant] .= 2;
+
+fire_state_palette = cgrad([:white, :orange, :green], 3; categorical = true)
+
+figure = Figure(; size = (600, 300), fontsize = 20, backgroundcolor = :transparent)
+forest_plot = Axis(figure[1:3, 1])
+B_plot = Axis(figure[1, 2])
+P_plot = Axis(figure[2, 2])
+V_plot = Axis(figure[3, 2])
+hidedecorations!(forest_plot)
+hidedecorations!(B_plot)
+hidedecorations!(P_plot)
+hidedecorations!(V_plot)
+rowgap!(figure.layout, 5)
+colgap!(figure.layout, 5)
+current_figure()
+
+heatmap!(forest_plot, forest; colormap = fire_state_palette)
+current_figure()
+
+epochs = 1:1000
+
+V = zeros(Int64, length(epochs));
+P = zeros(Int64, length(epochs));
+B = zeros(Int64, length(epochs));
+
+function _manage_empty_cells!(change, state, position, p_tree)
+    if rand() <= p_tree
+        setindex!(change, 2, position)
+    else
+        setindex!(change, 0, position)
+    end
+    return nothing
 end
 
-function cluster!(forest, i, j, p)
-    ns = neighborsof(i, j, size(forest)...)
-    for n in ns
-        if forest[n...] == 0
-            if rand() <= p
-                forest[n...] = 2
-                cluster!(forest, n..., p)
-            end
-        end
+function _manage_planted_cells!(change, state, position, p_fire)
+    if rand() <= p_fire
+        setindex!(change, 1, position)
     end
-    return forest
+    return nothing
 end
 
-function initial!(forest, pc, tr)
-    for i in axes(forest, 1)
-        for j in axes(forest, 2)
-            if rand() < pc
-                forest[i, j] = 2
-                cluster!(forest, i, j, pt / pc)
-            end
+function _manage_burning_cells!(change, state, position, kernel)
+    for surrounding in kernel
+        if state[position + surrounding] == 2
+            setindex!(change, 1, position + surrounding)
         end
     end
-    return forest
+    setindex!(change, 0, position)
+    return nothing
 end
 
-initial!(view(forest, 1, :, :), pc, pt)
-heatmap(forest[1, :, :])
-
-@showprogress for t in 1:(T-1)
-    current = view(forest, t, :, :)
-    future = view(forest, t + 1, :, :)
-    for i in axes(current, 1)
-        for j in axes(current, 2)
-            if current[i, j] == 2
-                if rand() <= pf
-                    future[i, j] = 1
-                else
-                    future[i, j] = 2
-                    for n in neighborsof(i, j, size(current)...)
-                        if rand() <= pt
-                            if future[n...] == 0
-                                future[n...] = 2
-                            end
-                        end
-                    end
-                end
-            end
+function fire!(change, state, p_tree, p_fire; kernel = CartesianIndices((-1:1, -1:1)))
+    used_indices = CartesianIndices(forest)[(begin + 1):(end - 1), (begin + 1):(end - 1)]
+    for pixel_position in used_indices
+        if state[pixel_position] == 0
+            _manage_empty_cells!(change, state, pixel_position, p_tree)
+        elseif state[pixel_position] == 2
+            _manage_planted_cells!(change, state, pixel_position, p_fire)
+        elseif state[pixel_position] == 1
+            _manage_burning_cells!(change, state, pixel_position, kernel)
         end
     end
-    for i in axes(current, 1)
-        for j in axes(current, 2)
-            if current[i, j] == 1
-                future[i, j] == 0
-                for n in neighborsof(i, j, size(future)...)
-                    if future[n...] == 2
-                        future[n...] = 1
-                    end
-                end
-            end
-        end
+    for pixel_position in used_indices
+        state[pixel_position] = change[pixel_position]
+        change[pixel_position] = state[pixel_position]
     end
-    for i in axes(current, 1)
-        for j in axes(current, 2)
-            if future[i, j] == 0
-                if rand() <= pt
-                    future[i ,j] = 2
-                end
-            end
-        end
-    end
+    return (count(iszero, state), count(isone, state), count(isequal(2), state))
 end
 
-fig = Figure(size=(400, 400))
-ax = Axis(fig[1, 1], aspect=DataAspect())
-hidedecorations!(ax)
-hm = heatmap!(ax, forest[1, :, :], colormap=fire_state_palette)
-for i in 1:200
-    hm[3].val .= forest[i, :, :]
-    display(fig)
+@showprogress for epoch in epochs
+    V[epoch], B[epoch], P[epoch] = fire!(forestchange, forest, p, f)
 end
+
+heatmap!(forest_plot, forest; colormap = fire_state_palette)
+lines!(P_plot, P; color = :green)
+lines!(B_plot, B; color = :orange)
+lines!(V_plot, V; color = :black)
+current_figure()
