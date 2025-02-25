@@ -16,7 +16,7 @@ forest[locations_to_plant] .= 2;
 
 fire_state_palette = cgrad([:white, :orange, :green], 3; categorical = true)
 
-figure = Figure(; size = (600, 300), fontsize = 20, backgroundcolor = :transparent)
+figure = Figure(; size = (1200, 600), fontsize = 20, backgroundcolor = :transparent)
 forest_plot = Axis(figure[1:3, 1])
 B_plot = Axis(figure[1, 2])
 P_plot = Axis(figure[2, 2])
