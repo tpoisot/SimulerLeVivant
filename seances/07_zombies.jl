@@ -43,8 +43,10 @@ end
 population = rand(Agent, L, 900)
 rand(population).infectious = true
 
-infectious(pop) = filter(ag -> ag.infectious, pop)
-healthy(pop) = filter(ag -> !ag.infectious, pop)
+isinfectious(agent::Agent) = agent.infectious
+ishealthy(agent::Agent) = !isinfectious(agent)
+infectious(pop::Vector{Agent}) = filter(isinfectious, pop)
+healthy(pop::Vector{Agent}) = filter(ishealthy, pop)
 incell(target, pop) = filter(ag -> (ag.x, ag.y) == (target.x, target.y), pop)
 
 tick = 0
@@ -90,21 +92,21 @@ end
 S = S[1:tick]
 I = I[1:tick]
 
-lines(S)
-lines!(I)
-current_figure()
-
 t = [e[1] for e in events]
 x = [e[2] for e in events]
 y = [e[3] for e in events]
 
-f = Figure()
-axl = Axis(f[1,1])
-lines!(axl, S)
-lines!(axl, I)
-axh = Axis(f[2,1])
-hist!(axh, collect(values(countmap([e[4] for e in events]))))
-axm = Axis(f[1:2,2:3])
-scatter!(axm, x, y, color=t, colormap=:lipari)
-current_figure()
+forbars = countmap(collect(values(countmap([e[4] for e in events]))))
 
+f = Figure(; size=(900, 600))
+axl = Axis(f[1,1], xlabel="Timestep", ylabel="Population")
+lines!(axl, S, label="Suscept.")
+lines!(axl, I, label="Infect.")
+axislegend(axl)
+axh = Axis(f[2,1], xticks=1:maximum(keys(forbars)), xlabel="Infection events", ylabel="Number of individuals")
+scatterlines!(axh, [get(forbars, i, 0) for i in 1:maximum(keys(forbars))], color=:black)
+axm = Axis(f[1:2,2:3])
+hm = scatter!(axm, x, y, color=t, colormap=Reverse(:dense), strokecolor=:black, strokewidth=1)
+Colorbar(f[1:2,end+1], hm, label="Time of infection")
+hidedecorations!(axm)
+current_figure()
