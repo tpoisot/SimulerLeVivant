@@ -18,7 +18,7 @@ Base.@kwdef mutable struct Landscape
     ymax::Int64 = 25
 end
 
-L = Landscape()
+L = Landscape(xmin=-80, xmax=80, ymin=-80, ymax=80)
 
 Random.rand(::Type{Agent}, L::Landscape) = Agent(x=rand(L.xmin:L.xmax), y=rand(L.ymin:L.ymax))
 Random.rand(::Type{Agent}, L::Landscape, n::Int64) = [rand(Agent, L) for _ in 1:n]
@@ -40,7 +40,7 @@ function move!(A::Agent, L::Landscape; torus=true)
     return A
 end
 
-population = rand(Agent, L, 900)
+population = rand(Agent, L, 9000)
 rand(population).infectious = true
 
 isinfectious(agent::Agent) = agent.infectious

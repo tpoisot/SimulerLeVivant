@@ -4,9 +4,9 @@ using CairoMakie
 using Statistics
 using ProgressMeter
 
-number_of_agents = 100
+number_of_agents = 120
 
-iterations, timestep = 10, 1e-2
+iterations, timestep = 1, 1e-3
 
 clicks = round(Int, iterations * (1 / timestep))
 
@@ -145,7 +145,7 @@ end
 
 
 parameters_shared = (repulsion_radius = 0.035, repulsion = 2.5, flocking_radius = 0.1, propulsion = 10.)
-parameters_slow = (parameters_shared..., flocking=2.0, target_speed = 0.02, stochasticity = 0.1)
+parameters_slow = (parameters_shared..., flocking=3.0, target_speed = 0.02, stochasticity = 0.1)
 parameters_fast = (parameters_shared..., flocking=0.1, target_speed = 0.1, stochasticity = 8.0)
 
 
