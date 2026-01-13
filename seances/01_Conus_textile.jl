@@ -11,7 +11,26 @@
 
 # ## Vecteurs et indexation
 
-# # Installer des _packages_
+# # Installer des packages
+
+# ## Les projets
+
+# ~~~ julia
+# import Pkg
+# Pkg.activate(".")
+# ~~~
+
+# ## Installer un package
+
+# ~~~ julia
+# Pkg.add("CairoMakie")
+# ~~~
+
+# ## Charger un package
+
+# ~~~ julia
+# using CairoMakie
+# ~~~
 
 # # Simulation: _Conus textile_
 
