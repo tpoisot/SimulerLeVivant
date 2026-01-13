@@ -5,6 +5,18 @@
 
 # # Introduction
 
+# ## Valeurs Booléennes
+
+# ## Opérations sur les valeurs Booléennes
+
+# ## Vecteurs et indexation
+
+# # Installer des _packages_
+
+# # Simulation: _Conus textile_
+
+# ## Définir les paramètres de la simulation
+
 n_cellules = 161
 
 # Définir le nombre de générations comme (n_cellules - 1) / 2 et convertir en entier
@@ -17,10 +29,7 @@ gen_suivante = zeros(Bool, n_cellules)
 milieu_index = div(length(gen_actuelle), 2) + 1
 gen_actuelle[milieu_index] = true
 
-# Fonction pour convertir les valeurs booléennes en carrés pleins / espaces
-function afficher_generation(generation)
-    return join([cellule ? '█' : ' ' for cellule in generation], "")
-end
+# ## Effectuer la simulation
 
 for generation in 1:n_generations
     # Afficher l'état actuel de gen_actuelle
@@ -40,5 +49,6 @@ for generation in 1:n_generations
     end
 end
 
-# Afficher l'état final de gen_actuelle
+# ## Afficher l'état final de la simulation
+
 println(afficher_generation(gen_actuelle))
