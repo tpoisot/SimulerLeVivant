@@ -200,9 +200,9 @@ rand(Bool, 3, 2)
 
 ````
 3×2 Matrix{Bool}:
- 1  0
- 0  1
  0  0
+ 0  0
+ 0  1
 ````
 
 Au cours de la session, nous allons identifier des façons différentes de
