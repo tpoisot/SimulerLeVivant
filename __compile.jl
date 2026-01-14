@@ -19,7 +19,10 @@ cfg = Dict(
 
 # Run the files
 for seance in seances
-    Literate.markdown(seance, out_path; config=cfg, flavor = Literate.CommonMarkFlavor())
+    out_file = Literate.markdown(seance, out_path; config=cfg, flavor = Literate.CommonMarkFlavor())
+    @info out_file
+    run(`pandoc $(out_file) -o $(replace(out_file, ".md" => ".typ"))`)
+    run(`typst compile $(replace(out_file, ".md" => ".typ"))`)
 end
 
 # TODO: pandoc -> typst -> PDF

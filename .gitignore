@@ -1,3 +1,5 @@
 Manifest.toml
 population_dynamics.mp4
 output/*.png
+output/*.typ
+output/*.md
