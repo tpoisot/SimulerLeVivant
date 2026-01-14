@@ -14,12 +14,12 @@ end
 cfg = Dict(
     "credit" => false,
     "execute" => true,
-    "continue_on_error" => true
+    "continue_on_error" => true,
 )
 
 # Run the files
 for seance in seances
-    Literate.markdown(seance, out_path; config=cfg)
+    Literate.markdown(seance, out_path; config=cfg, flavor = Literate.CommonMarkFlavor())
 end
 
 # TODO: pandoc -> typst -> PDF
