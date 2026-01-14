@@ -18,7 +18,7 @@
 
 true
 
-# et la second est "faux":
+# et la seconde est "faux":
 
 false
 
@@ -70,7 +70,63 @@ true ⊻ true
 # exemple, `⊻` est défini, pour deux entrées `x₁` et `x₂`, comme `(x₁ | x₂) &
 # (!(x₁ & x₂))`.
 
-# ## Vecteurs et indexation
+# ## Vecteurs et matrices
+
+# Une des tâches les plus courantes que nous devrons réaliser est de stocker de
+# l'information dans des structures avec plusieurs dimensions. Autant que
+# possible, nous essaierons de connaître les dimensions de ces objets avant de
+# les créer.
+
+# Un objet à une seule dimension est un vecteur, et on peut en créer un avec la
+# commande
+
+zeros(5)
+
+# qui se lit "un vecteur de cinq positions initialement rempli de zéros". Par
+# défaut, ce vecteur pourra stocker des _nombres_ (nous reviendrons sur la
+# définition d'un nombre plus tard), mais on peut créer un vecteur qui contient
+# des valeurs Booléennes:
+
+zeros(Bool, 3)
+
+# **NB:** Regardez la documentation des fonctions `rand` et `ones`.
+
+# On peut aussi créer des objets avec plus d'une dimension, comme des matrices
+# (deux dimensions), des tenseurs (trois dimensions), etc.. Par exemple, cette
+# commande crée une matrice initialement rempli de valeurs Booléennes
+# aléatoires, avec 3 lignes et 2 colonnes:
+
+rand(Bool, 3, 2)
+
+# Au cours de la session, nous allons identifier des façons différentes de
+# naviguer dans ces objets. Pour le moment, nous allons nous contenter de
+# trouver et de modifier le contenu de ces objets en utilisant les coordonées.
+
+# Pour un vecteur, on peut extraire l'information en utilisant le numéro de la
+# position. Notez que les vecteurs dans Julia sont des colonnes (pour faciliter
+# les opérations d'algèbre linéaire):
+
+V = zeros(Bool, 3)
+V[1]
+
+# On peut modifier la deuxième position de ce vecteur:
+
+V[2] = true
+V
+
+# Il existe aussi les raccourcies `begin` (premier élément) et `end` (dernier
+# élément):
+
+V[begin] = true
+V
+
+# Pour une matrice, l'indexation se fait exactement de la même manière, mais on
+# utilise les coordonées sous la forme ligne, colonne:
+
+M = zeros(Bool, 2, 3)
+M[1, 2] = true
+M[2, 3] = true
+M
 
 # # Installer des packages
 
@@ -130,5 +186,3 @@ for generation in 1:n_generations
 end
 
 # ## Afficher l'état final de la simulation
-
-println(afficher_generation(gen_actuelle))
