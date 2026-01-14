@@ -2,7 +2,7 @@
 
 julia_version = "1.12.4"
 manifest_format = "2.0"
-project_hash = "f2303b57b77e48f85b9cf1268a13eb28a8352fe4"
+project_hash = "b99360734a09ba6144b340fd8f54b702cfe491b0"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -484,6 +484,12 @@ git-tree-sha1 = "68c173f4f449de5b438ee67ed0c9c748dc31a2ec"
 uuid = "34004b35-14d8-5ef3-9330-4cdb6864b03a"
 version = "0.3.28"
 
+[[deps.IOCapture]]
+deps = ["Logging", "Random"]
+git-tree-sha1 = "0ee181ec08df7d7c911901ea38baf16f755114dc"
+uuid = "b5f81e59-6552-4d32-b1f0-c071b021bf89"
+version = "1.0.0"
+
 [[deps.ImageAxes]]
 deps = ["AxisArrays", "ImageBase", "ImageCore", "Reexport", "SimpleTraits"]
 git-tree-sha1 = "e12629406c6c4442539436581041d372d69c55ba"
@@ -777,6 +783,12 @@ version = "2.41.2+0"
 deps = ["Libdl", "OpenBLAS_jll", "libblastrampoline_jll"]
 uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 version = "1.12.0"
+
+[[deps.Literate]]
+deps = ["Base64", "IOCapture", "JSON", "REPL"]
+git-tree-sha1 = "bb26d8b8ed0fa451ce3511e99c950653a2f31fe1"
+uuid = "98b081ad-f1c9-55d3-8b20-4c87d4299306"
+version = "2.21.0"
 
 [[deps.LogExpFunctions]]
 deps = ["DocStringExtensions", "IrrationalConstants", "LinearAlgebra"]

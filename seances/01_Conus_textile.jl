@@ -1,13 +1,74 @@
 # ---
-# title: La pigmentation de _Conus textile_
+# title: Séance 1
+# topic: La pigmentation de _Conus textile_
 # author: Timothée Poisot
 # ---
 
-# # Introduction
+# # Concepts principaux
 
 # ## Valeurs Booléennes
 
+# Les valeurs Booléennes représentent les états "vrai" et "faux", et sont
+# particulièrement importantes pour nous: elles vont intervenir dans la majorité
+# des sénces. De manière générale, beaucoup de décisions que nous allons prendre
+# seront _in fine_ des questions dont la réponse est "oui" ou "non", et les
+# valeurs Booléennes sont appropriés dans ce contexte.
+
+# La première valeur est "vrai":
+
+true
+
+# et la second est "faux":
+
+false
+
+# Nous pouvons combiner ces valeurs via différentes opérations.
+
 # ## Opérations sur les valeurs Booléennes
+
+# Les valeurs Booléennes ont leurs propres opérations. Ces opérations ont la
+# propriété de prendre comme entrée une où plusieurs valeurs Booléenes, et de
+# retourner une réponse Booléenne.
+
+# La première est le `or`, qui renvoie vrai _ssi_ au moins une de ses entrées
+# est vrai. Elle est représentée par la barre verticale:
+
+true | true
+#-
+true | false
+#-
+false | false
+
+# La seconde opération importante est `and`, qui renvoie vrai _ssi_ ses deux
+# entrées sont vraies. Elle est représentée par le signe `&`:
+
+true & true
+#-
+true & false
+#-
+false & false
+
+# On peut aussi prendre la _négation_ d'une valeur Booléenne avec l'opérateur
+# `not`, qui est en général représenté par `!`, mais parfois aussi par `~`:
+
+!true
+#-
+!false
+
+# Le dernier opérateur Booléen est le `xor` ("où exclusif"), qui renvoie vrai
+# uniquement _ssi_ l'opération `or` appliquée à des deux entrées revnoie vrai
+# _et_ que l'opération `and` renvoie faux. Il est representé par le signe `⊻`,
+# qui s'écrit `\xor<Tab>`
+
+true ⊻ false
+#-
+false ⊻ false
+#-
+true ⊻ true
+
+# Ces opérateurs peuvent être utilisés pour prendre des décisions complexes. Par
+# exemple, `⊻` est défini, pour deux entrées `x₁` et `x₂`, comme `(x₁ | x₂) &
+# (!(x₁ & x₂))`.
 
 # ## Vecteurs et indexation
 
