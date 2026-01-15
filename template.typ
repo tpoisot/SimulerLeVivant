@@ -1,6 +1,6 @@
 #set page(
   paper: "us-letter",
-  margin: (x: 4cm, y: 3cm),
+  margin: (left: 5cm, right: 5cm, y: 3.5cm),
 )
 #set par(
   justify: true,
@@ -12,9 +12,17 @@
 #show math.equation: set text(font: "Libertinus Math")
 #show raw: set text(font: "Iosevka Custom", size: 10.5pt) 
 
+#text(fill: luma(70), font: "Libertinus Sans", size: 15pt)[BIO2045 -- $title$]
+#linebreak()
+#text(fill: luma(20), font: "Libertinus Sans", size: 20pt)[$topic$]
+
+#v(2em)
+
 #outline(
   title: "Contenu",
   depth: 2
 );
+
+#v(2em)
 
 $body$

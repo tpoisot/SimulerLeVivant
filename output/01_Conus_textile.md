@@ -187,7 +187,9 @@ zeros(Bool, 3)
  0
 ````
 
-**NB:** Regardez la documentation des fonctions `rand` et `ones`.
+**NB**: même si le résultat est affiché avec des `0` et des `1`, il s'agit
+bien de valeurs Booléennes; pour gagner de la place, `true` est en général
+remplacé par `1` et `false` par `0`.
 
 On peut aussi créer des objets avec plus d'une dimension, comme des matrices
 (deux dimensions), des tenseurs (trois dimensions), etc.. Par exemple, cette
@@ -201,9 +203,11 @@ rand(Bool, 3, 2)
 ````
 3×2 Matrix{Bool}:
  0  0
- 0  0
- 0  1
+ 1  1
+ 1  1
 ````
+
+**NB:** regardez la documentation des fonctions `rand` et `ones`.
 
 Au cours de la session, nous allons identifier des façons différentes de
 naviguer dans ces objets. Pour le moment, nous allons nous contenter de
@@ -357,5 +361,5 @@ hidespines!(current_axis())
 hidedecorations!(current_axis())
 current_figure()
 ````
-![](01_Conus_textile-65.png)
+![](01_Conus_textile-66.png)
 
