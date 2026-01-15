@@ -18,11 +18,11 @@
 #show raw: set text(font: "JuliaMono", size: 9.8pt)
 #show raw.where(block: false): set text(fill: maroon)
 #show raw.where(block: true): it => block(
-  fill: luma(95%),
+  fill: luma(98%),
   inset: 9pt,
   width: 100%,
   radius: 1pt,
-  stroke: 0.2pt + luma(70%),
+  stroke: 0.2pt + luma(40%),
   text(fill: luma(20%), size: 8pt, it)
 )
 

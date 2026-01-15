@@ -204,7 +204,7 @@ rand(Bool, 3, 2)
 3×2 Matrix{Bool}:
  0  0
  1  1
- 0  0
+ 1  0
 ````
 
 **NB:** regardez la documentation des fonctions `rand` et `ones`.
