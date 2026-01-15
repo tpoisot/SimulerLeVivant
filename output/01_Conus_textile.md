@@ -204,7 +204,7 @@ rand(Bool, 3, 2)
 3×2 Matrix{Bool}:
  0  0
  1  1
- 1  1
+ 0  0
 ````
 
 **NB:** regardez la documentation des fonctions `rand` et `ones`.
@@ -273,20 +273,52 @@ M
 
 # Installer des packages
 
+Les _packages_ contiennent des fonctionnalités qui ne sont pas présentes dans
+le langage par défaut. Certains de ces packages (comme `Statistics` et
+`Random`) font partie de la bibliothèque standard (_standard library_) du
+langage, mais d'autres doivent être installés pour les utiliser.
+
 ## Les projets
+
+Julia stocke ses packages d'une manière qui diffère de plusieurs autres
+langages de programmation. L'information sur la liste et les des packages
+utilisée est stockée localement dans un fichier `Project.toml`, et les
+versions complètes de toutes les dépendences sont stockées dans un fichier
+`Manifest.toml`. Ces deux fichiers sont en général créés automatiquement.
+
+Pour cette raison, il est _indispensable_ de créer un environnement, qui sera
+à la racine du projet. Dans le cadre de ce cours, vous pouvez créer _un seul_
+environnement pour l'ensemble des séances.
 
 ~~~ julia
 import Pkg
 Pkg.activate(".")
 ~~~
 
+La documentation du gestionnaire de packages est disponible en ligne:
+<https://pkgdocs.julialang.org/v1/> -- il est important de la consulter.
+
+Il faut activer cet environnement avec la même syntaxe avant d'éxécuter du
+code. Dans VSCode, cette activation se fait automatiquement.
+
+*NB*: on peut aussi activer le mode `pkg` avec la touche `]` - la
+documentation du package manager explique comment.
+
 ## Installer un package
+
+On peut installer un package avec la commande `add`. Par exemple, cette
+commande va installer le package `CairoMakie`, que nous allons utiliser pour
+la visualisation.
 
 ~~~ julia
 Pkg.add("CairoMakie")
 ~~~
 
+La documentation de Makie est disponible en ligne: <https://docs.makie.org/stable/>
+
 ## Charger un package
+
+Il faut importer explicitement les packages pour pouvoir les utiliser:
 
 ````julia
 using CairoMakie
@@ -361,5 +393,5 @@ hidespines!(current_axis())
 hidedecorations!(current_axis())
 current_figure()
 ````
-![](01_Conus_textile-66.png)
+![](01_Conus_textile-75.png)
 
