@@ -203,8 +203,8 @@ rand(Bool, 3, 2)
 ````
 3×2 Matrix{Bool}:
  1  0
+ 0  1
  0  0
- 1  0
 ````
 
 **NB:** regardez la documentation des fonctions `rand` et `ones`.
@@ -326,6 +326,32 @@ using CairoMakie
 
 # Simulation: _Conus textile_
 
+Nous allons simuler la pigmentation de la coquille de _Conus textile_ en
+utilisant un automate cellulaire très-simple, qui est en général appelé _Rule
+30_.
+
+_Rule 30_ est un automate cellulaire qui fonctionne sur une seule dimension. À
+chaque génération, une cellule $q$ change d'état selon l'état de ses deux
+voisins $p$ et $r$, et de son propre état.
+
+Pour trouver l'état de la cellule au temps suivant, on s'intéresse à la
+séquence de valeurs Booléennes qui représente $p$, $q$, et $r$. Si le triplet
+$p,q,r$ vaut $100$, $011$, $010$, ou $001$, la cellule est active. Sinon, la
+cellule devient inactive.
+
+**NB**: les transitions dans cette famille d'automates cellulaires sont
+toujours listées dans le même ordre: $111$, $110$, $101$, $100$, $011$, $010$,
+$00$, et $000$. La séquence des états qui correspond, $00011110$, est la
+représentation binaire du nombre $30$, ce qui donne son nom à la rêgle.
+
+_Rule 30_ peut se représenter de manière beaucoup plus simple, avec la formule
+suivante: `p ⊻ (q | r)`. On peut donc simuler l'évolution de cette rêgle dans
+le temps avec une expression beaucoup plus simple.
+
+**NB**: vous pouvez aussi essayer de ré-écrire ce code en utilisant la séquen
+de $p$, $q$, et $r$, ce qui permettra de remplaer _Rule 30_ par _Rule 90_
+($01011010$), qui donne un résultat similaire.
+
 ## Définir les paramètres de la simulation
 
 ````julia
@@ -393,5 +419,5 @@ hidespines!(current_axis())
 hidedecorations!(current_axis())
 current_figure()
 ````
-![](01_Conus_textile-75.png)
+![](01_Conus_textile-81.png)
 
