@@ -162,7 +162,7 @@ M
 # Il faut activer cet environnement avec la même syntaxe avant d'éxécuter du
 # code. Dans VSCode, cette activation se fait automatiquement.
 
-# *NB*: on peut aussi activer le mode `pkg` avec la touche `]` - la
+# **NB**: on peut aussi activer le mode `pkg` avec la touche `]` - la
 # documentation du package manager explique comment.
 
 # ## Installer un package
