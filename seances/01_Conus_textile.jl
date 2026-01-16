@@ -177,6 +177,10 @@ M
 
 # La documentation de Makie est disponible en ligne: <https://docs.makie.org/stable/>
 
+# L'étape d'installation des packages peut être _très_ longue, parce que Julia
+# va les compiler avant leur utilisation. Une fois que les packages sont
+# compilés, leur chargement est beaucoup plus rapide.
+
 # ## Charger un package
 
 # Il faut importer explicitement les packages pour pouvoir les utiliser:
@@ -214,44 +218,111 @@ using CairoMakie
 # ## Définir les paramètres de la simulation
 
 # Pour effectuer la simulation, nous allons commencer par choisir un nombre de
-# cellules. Puisque nous allons démarrer la simulation avec une seule cellule
-# pigmentée, et simuler la division cellulaire, TK
+# cellules: cette quantité est une _variable_, `n_cellules`, dont la _valeur_
+# est fixée avant le départ de la simulation:
 
 n_cellules = 191
 
-# Définir le nombre de générations comme (n_cellules - 1) / 2 et convertir en entier
+# Nous allons ensuite identifier le nombre de générations qu'il faut simuler.
+# Puisque notre modèle simule de la croissance, qui va être symétrique, on veut
+# arrêter la simulation à la génération pour laquelle toutes les cellules auront
+# été activées:
+
 n_generations = Int((n_cellules - 1) / 2)
 
-# TODO
+# Quand on assigne cette variable, on oblige le nombre qu'elle contient à être
+# un nombre entier (`Int`). Nous reviendrons plus tard sur les différents types
+# de nombres.
+
+# Une fois les deux paramètres connus, nous pouvons créer un objet qui va
+# représenter la coquille du coquillage. Spécifiquement, nous allons stocker
+# l'état des cellules dans une matrice, qui aura une ligne par cellule, et une
+# colonne par génération de division cellulaire:
+
 shell = zeros(Bool, n_cellules, n_generations);
 
-# Trouver l'index de la cellule au milieu et mettre sa valeur à true
+# Comme on sait que l'état de nos cellules est représenté par une variable
+# Booléenne (pigmenté est `true`, non-pigmenté est `false`), on a spécifié que
+# cet objet contenait des variables Booléennes.
+
+# Notez qu'on a ajouté le `;` à la fin de la ligne: cela permet de ne pas
+# afficher le résultat de l'opération, ce qui est en général une bonne pratique
+# si les objets sont très grands.
+
+# ## Conditions initiales
+
+# On doit maintenant définir l'état de la première génération. Nous allons
+# partir avec une seule cellule, qui est initialement pigmentée (`true`), et qui
+# se situe à la position du milieu:
+
 milieu_index = div(n_cellules, 2) + 1
-shell[milieu_index, 1] = true
+
+# On utilise ici la fonction `div` -- sa documentation est accessible avec
+# `?div`.
+
+# Un fois que la position initiale est identifiée, on peut modifier l'état de
+# cette cellule. Puisque notre coquille est représentée par une matrice, il faut
+# indiquer la ligne (la cellule) et la colonne (la génération):
+
+shell[milieu_index, 1] = true;
 
 # ## Effectuer la simulation
 
-for generation in 2:n_generations
+# On va maintenant effectuer la simulation. Pour cette simulation, nous allons
+# utiliser une boucle avec `for`. Nous passerons plus de temps pendant les
+# prochaines séances sur les différents types de boucles.
 
+## On commence a la génération 2, parce que la génération
+## 1 est la génération initiale!
+for generation in 2:n_generations
+    
+    ## On ne met à jour que les cellules 2 jusqu'à n-1, pour
+    ## éviter les effets de bord.
     for cellule in 2:n_cellules-1
+
+        ## La cellule p est la cellule à gauche, et on veut
+        ## son état dans la génération précédente
         p = shell[cellule-1, generation-1]
+
+        ## Même logique pour q et r
         q = shell[cellule, generation-1]
         r = shell[cellule+1, generation-1]
 
-        ## Règle de transition pour la Rule 30 des automates cellulaires : p xor (q or r)
+        ## Règle de transition pour la Rule 30 des automates
+        ## cellulaires : p xor (q or r)
         shell[cellule, generation] = p ⊻ (q || r)
     end
 
 end
 
+# La simulation est maintenant termineé. Notez qu'ici rien n'est affiché, parce
+# que nous n'avons pas explicitement demandé de voir un objet.
+
 # ## Afficher l'état final de la simulation
 
+# On va utiliser le package `CairoMakie` pour visualiser la simulation. 
+
+## Visualisation de type heatmap
 heatmap(
+    ## On passe d'abord l'objet a visualiser
     shell,
+    ## Puis on fixe les deux couleurs à blanc et noir
+    ## pour resp. `false` et `true`
     colormap=[:white, :black],
+    ## On spécifie que les cellules du heatmap
+    ## sont des carrés
     axis=(; aspect=DataAspect()),
+    ## Et on fixe enfin un plus grand nombre de pixles pour avoir
+    ## une meilleure résolution
     figure=(; size=(3n_cellules, 3n_generations), figure_padding=0)
 )
+
+## On termine enfin cette figure en retirant les axes et les graduations,
+## puis en affichant la figure finale
 hidespines!(current_axis())
 hidedecorations!(current_axis())
 current_figure()
+
+# Comparez cette simulation a des images de _Conus textile_. En imaginant cette
+# surface enroulée autour d'un axe, est-ce que notre simulation a produit une
+# bonne approximation de la pigmentation de la coquille?
