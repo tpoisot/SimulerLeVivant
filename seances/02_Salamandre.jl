@@ -4,12 +4,60 @@
 # author: Timothée Poisot
 # ---
 
+# # Concepts principaux
+
+# ## Indexation dans les matrices
+
+# ## Iteration
+
+# Dans la séance précédente, nous avions utilisé une boucle `for`, qui
+# permettait de répéter un processus plusieurs fois. Dans cette séance, nous
+# allons formaliser ce concept, qui est fondamental pour le reste du cours.
+
+# Une boucle `for` est une structure qui s'écrit en général de la manière
+# suivante:
+
+# ~~~
+# for ELEMENT in COLLECTION
+#   instructions
+# end
+# ~~~
+
+# La variable `ELEMENT` n'existe pas en dehors de la boucle. C'est une nuance
+# importante: elle est créée par la boucle, et détruite quand la boucle est
+# terminée. Une boucle `for` va simplement prendre chaque valeur de
+# `COLLECTION`, les stocker dans `ELEMENT`, et on pourra donc appliquer des
+# opérations de manière itérative.
+
+# Par exemple, si on veut multiplier par deux tous les éléments du vecteur `[1,
+# 2, 3, 4]`, et afficher le résultat sur une nouvelle ligne avec `println`, on
+# peut utiliser une boucle `for`:
+
+for x in [1, 2, 3, 4]
+    println(2x)
+end
+
+# ## Nombres (pseudo)-aléatoires 
+
+
+
+import Random
+Random.seed!(2045)
+
+# # Un automate cellulaire pour la pigmentation
+# ## Règles biologiques
+
+# ## État initial
+
+# ## Mise à jour de l'activation des cellules
+
+# ## Résultat final
+
 using CairoMakie
 
 # Seed
 
-import Random
-Random.seed!(2045)
+
 
 """
     etat_initial(rows, cols, p_activation)
