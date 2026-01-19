@@ -169,28 +169,38 @@ operation(3.0, 2.5)
 
 # # Un automate cellulaire pour la pigmentation
 
+# Avec cette simulation, nous voulons observer la pigmentation d'un tissu en
+# utilisant une série de règles simples qui vont approximer un modèle dit de
+# réaction/diffusion. Ces modèles ont été introduits par Alan Turing dans les
+# années 1950 @turing1952chemical.
+
+# Le modèle d'origine utilise des équations différentielles partielles pour
+# modéliser la diffusion, mais on peut approximer les même mécanismes avec un
+# automate cellulaire. Nous allons d'abord définir le problème et son état
+# initial, puis introduire les différents règles.
+
+# Ce modèle représente un tissu (la peau ou le pelage d'un animal) comme un
+# espace en deux dimensions, dans lequel chaque position (cellule dans une
+# lattice) est soit pigmentée (`true`), soit non-pigmentée (`false`).
+
 # ## État initial
 
+# Le tissu a une dimension qui reste fixe pendant toute la simulation. Notez
+# qu'ici on définit deux variables sur la même ligne. C'est un raccourci
+# d'écriture qui n'est pas nécessaire.
 
-lignes = 255  # Nombre de lignes dans la grille
-colonnes = 195  # Nombre de colonnes dans la grille
-p_activation = 0.01  # Probabilité d'activation initiale
+lignes, colonnes = 205, 155 
 
-#-
+# On définit ensuite une probabilité que les cellules soient initialement
+# pigmentées. Puisque c'est une probabilité, ce nombre devrait être entre 0 et
+# 1.
 
-"""
-    etat_initial(rows, cols, p_activation)
+p_activation = 0.01
 
-Initialise une grille avec des cellules activées aléatoirement.
+# Pour l'état initial, on va devoir parcourir une grille de taille `lignes`,
+# `colonnes`, et pour chaque cellule, lui donner la valeur qui correspond à la
+# pigmentation (`true`) avec une probabilité `p_activation`.
 
-Arguments:
-- `rows::Int`: Nombre de lignes dans la grille
-- `cols::Int`: Nombre de colonnes dans la grille
-- `p_activation::Float64`: Probabilité d'activation initiale
-
-Retourne:
-- `Array{Bool, 2}`: Grille initialisée
-"""
 function etat_initial(rows, cols, p_activation)
     lattice = zeros(Bool, rows, cols)
     for row in 1:rows
@@ -201,11 +211,14 @@ function etat_initial(rows, cols, p_activation)
     return lattice
 end
 
-# 
+# Cette fonction utilise `rand()`, qui par défaut génère un nombre aléatoire
+# entre 0 et 1, avec une distribution uniforme.
 
 # Avec ces informations, on peut maintenant créer notre lattice:
 
 lattice = etat_initial(lignes, colonnes, p_activation);
+
+# On n'affiche pas cette lattice, qui peut être très grande.
 
 # Ici, on choisit d'appeller cet object `lattice`, puisque c'est ce qu'il
 # représente. Mais on peut donner un nom plus explicite à cet object, comme par
@@ -218,6 +231,22 @@ lattice = etat_initial(lignes, colonnes, p_activation);
 # sont toutes gratuites.
 
 # ## Règles biologiques
+
+# Dans notre simulation du modèle de réaction/diffusion, une cellule va
+# s'activer si le signal qui encourage son activation est plus grand que le
+# signal qui encourage sa désactivation. Ces deux signaux se calculent de la
+# même façon: le nombre de voisins actifs, multiplié par le poids du signal d'activation.
+
+# Autrement dit, une cellule se pigmente _si_ $w_a N_a > w_i N_i$, avec $w_a$ et
+# $w_i$ les poids de l'activation et de l'inhibition, et $N_a$ et $N_i$ le
+# nombre de cellules voisines qui sont activées et inhibées.
+
+# Ce modèle représente une situation dans laquelle une cellule est activée en
+# réponse à la diffusion de deux substances: les cellules activées diffusent une
+# substance activatrice, et les cellules inhibées diffusent une substance
+# inhibitrice. Les poids $w_a$ et $w_i$ mesurent l'affinité des cellules pour
+# ces substances, et on peut modifier le rayon de diffusion des substances en
+# calculant le nombre de voisins dans un voisinage toujours plus grand.
 
 # ## Mise à jour de l'activation des cellules
 

@@ -5,7 +5,7 @@
     right + horizon,
     text(font: "Libertinus Sans", fill: luma(40%), size: 8pt)[BIO2045 - $topic$],
   ),
-  numbering: "1 de 1"
+  numbering: "1 de 1",
 )
 #set par(
   justify: false,
@@ -23,7 +23,7 @@
   width: 100%,
   radius: 1pt,
   stroke: 0.2pt + luma(40%),
-  text(fill: luma(20%), size: 8pt, it)
+  text(fill: luma(20%), size: 8pt, it),
 )
 #show raw.where(block: true, lang: none): it => block(
   fill: luma(99%),
@@ -31,7 +31,7 @@
   width: 100%,
   radius: 1pt,
   stroke: 0.2pt + luma(80%),
-  text(fill: luma(20%), size: 8pt, it)
+  text(fill: luma(20%), size: 8pt, it),
 )
 #show raw.where(block: true, lang: "raw"): it => block(
   fill: luma(97%),
@@ -39,8 +39,12 @@
   width: 100%,
   radius: 1pt,
   stroke: (paint: maroon, thickness: 0.2pt, dash: "dashed"),
-  text(fill: maroon, size: 8pt, it)
+  text(fill: maroon, size: 8pt, it),
 )
+
+// This is a nasty-ass POS hack but it's because [@cite] gets turned into a ref
+// instead of a proper cite
+#show cite.where(form: "prose"): it => cite(it.key)
 
 #show link: set text(font: "Libertinus Sans", fill: blue)
 
@@ -56,9 +60,15 @@
 
 #outline(
   title: "Contenu",
-  depth: 2
+  depth: 2,
 );
 
 #v(3em)
 
 $body$
+
+#context {
+  if query(cite).dedup().len() > 0 {
+    bibliography("bibliography.bib", style: "american-physics-society", title: "Références")
+  }
+}

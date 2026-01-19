@@ -17,6 +17,8 @@ cfg = Dict(
     "continue_on_error" => true,
 )
 
+run(`cp bibliography.bib $(out_path)`)
+
 # Run the files
 for seance in seances
     out_file = Literate.markdown(seance, out_path; config=cfg, flavor = Literate.CommonMarkFlavor())
