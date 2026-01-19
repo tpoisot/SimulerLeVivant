@@ -171,6 +171,13 @@ operation(3.0, 2.5)
 
 # ## État initial
 
+
+lignes = 255  # Nombre de lignes dans la grille
+colonnes = 195  # Nombre de colonnes dans la grille
+p_activation = 0.01  # Probabilité d'activation initiale
+
+#-
+
 """
     etat_initial(rows, cols, p_activation)
 
@@ -193,6 +200,22 @@ function etat_initial(rows, cols, p_activation)
     end
     return lattice
 end
+
+# 
+
+# Avec ces informations, on peut maintenant créer notre lattice:
+
+lattice = etat_initial(lignes, colonnes, p_activation);
+
+# Ici, on choisit d'appeller cet object `lattice`, puisque c'est ce qu'il
+# représente. Mais on peut donner un nom plus explicite à cet object, comme par
+# exemple `pelage`, ou encore `🦓`. Julia accepte la majorité des [symboles
+# unicode](https://docs.julialang.org/en/v1/manual/unicode-input/). Il se peut
+# que votre police de caractère ne les affiche pas tous --- celles qui ont le
+# plus de support sont [Iosevka](https://typeof.net/Iosevka/) (ma préférée!),
+# [JuliaMono](https://juliamono.netlify.app/#), et dans une moindre mesure,
+# [Noto Sans Mono](https://fonts.google.com/noto/specimen/Noto+Sans+Mono). Elles
+# sont toutes gratuites.
 
 # ## Règles biologiques
 
@@ -296,14 +319,11 @@ wi = 0.12  # Poids de l'inhibition
 Ra = 2  # Rayon d'activation
 Ri = 9  # Rayon d'inhibition
 
-lignes = 95  # Nombre de lignes dans la grille
-colonnes = 65  # Nombre de colonnes dans la grille
+# stuff i guess
 
-p_activation = 0.05  # Probabilité d'activation initiale
 temps = 100  # Nombre de générations à simuler
 
 # Initialisation de la grille
-lattice = etat_initial(lignes, colonnes, p_activation);
 
 # Pour chaque génération
 for gen in 1:temps
