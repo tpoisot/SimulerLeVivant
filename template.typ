@@ -17,13 +17,29 @@
 #show math.equation: set text(font: "Libertinus Math")
 #show raw: set text(font: "JuliaMono", size: 9.8pt)
 #show raw.where(block: false): set text(fill: maroon)
-#show raw.where(block: true): it => block(
-  fill: luma(98%),
+#show raw.where(block: true, lang: "julia"): it => block(
+  fill: luma(97%),
   inset: 9pt,
   width: 100%,
   radius: 1pt,
   stroke: 0.2pt + luma(40%),
   text(fill: luma(20%), size: 8pt, it)
+)
+#show raw.where(block: true, lang: none): it => block(
+  fill: luma(99%),
+  inset: 9pt,
+  width: 100%,
+  radius: 1pt,
+  stroke: 0.2pt + luma(80%),
+  text(fill: luma(20%), size: 8pt, it)
+)
+#show raw.where(block: true, lang: "raw"): it => block(
+  fill: luma(97%),
+  inset: 9pt,
+  width: 100%,
+  radius: 1pt,
+  stroke: (paint: maroon, thickness: 0.2pt, dash: "dashed"),
+  text(fill: maroon, size: 8pt, it)
 )
 
 #show link: set text(font: "Libertinus Sans", fill: blue)

@@ -6,7 +6,61 @@
 
 # # Concepts principaux
 
-# ## Indexation dans les matrices
+# ## Indexation basique dans les matrices
+
+# Dans la séance précédente, nous avons vu comment créer des matrices, et
+# comment lire le contenu à une ligne et colonne particulière. On peut, en
+# pratique, faire beaucoup plus avec des matrices.
+
+# Prenons l'exemple de la matrice suivante, avec trois lignes et cinq colonnes,
+# qui contient des nombres aléatoires entiers entre 1 et 5:
+
+V = rand(1:5, 3, 5)
+
+# On peut accéder à la première ligne de cette matrice avec
+
+V[1,:]
+
+# et à sa deuxième colonne avec
+
+V[:,2]
+
+# On peut aussi prendre les deux premières lignes, et les trois dernières
+# colonnes, avec
+
+V[begin:(begin+1), (end-2):end]
+
+# Ce qui est la même chose que 
+
+V[1:2, 3:5]
+
+# mais sans avoir besoin d'avoir les coordonées exactes de la dernière colonne.
+
+# ## Indexation avancée dans les matrices
+
+# Les matrices ont toutes un système de coordonées, qui sont soit les coordonées
+# Cartésiennes:
+
+collect(CartesianIndices(V))
+
+# soit les coordonées linéaires:
+
+collect(LinearIndices(V))
+
+# Notez que les coordonées linéaires suivent les colonnes: Julia est un langage
+# _column-major_, qui va stocker les colonnes ensemble dans la mémoire. Si on
+# veut améliorer la performance de nos simulations, opérer sur les colonnes sera
+# souvent beaucoup plus rapide que d'opérer sur les lignes.
+
+# Une caractéristique importante des indices est qu'ils sont _relatifs_. Par
+# exemple, si on veut exprimer la position qui est "la cellule à gauche de la
+# position 3, 4", on peut l'écrire
+
+CartesianIndex(3, 4) + CartesianIndex(-1, 0)
+
+# La position `CartesianIndex(-1, 0)` signifie: une colonne avant, sur la même
+# ligne. Nous allons _beaucoup_ utiliser cette propriété pour nous déplacer
+# rapidement dans des matrices.
 
 # ## Iteration
 
@@ -17,7 +71,7 @@
 # Une boucle `for` est une structure qui s'écrit en général de la manière
 # suivante:
 
-# ~~~
+# ~~~ raw
 # for ELEMENT in COLLECTION
 #   instructions
 # end
@@ -37,27 +91,65 @@ for x in [1, 2, 3, 4]
     println(2x)
 end
 
+# ## Iteration avancée dans les matrices
+
+# On peut traverser des matrices de façon beaucoup plus efficace en combinant
+# les boucles `for` et les techniques d'indexation. Pour rappel, dans cette
+# section, nous utilisons la matrice suivante:
+
+V = rand(1:9, 3, 4)
+
+# Par exemple, on peut prendre chaque élément d'une matrice sans devoir
+# spécifier les lignes et les colonnes:
+
+for v in V
+    println(v)
+end
+
+# Remarquez que l'ordre des éléments suit ici le `LinearIndex`. On peut aussi
+# aller chercher directement les indices des matrices:
+
+for i in eachindex(V)
+    println(i)
+end
+
+# Mais les indices sont eux-même retournés sous forme de matrice. On peut donc
+# itérer sur les indices Cartésiens:
+
+for ci in CartesianIndices(V)
+    println(ci)
+end
+
+# Cette structure est particulièrement utile, parce que nous aurons souvent
+# besoin de faire des tâches comme: pour chaque cellule, prendre la cellue du
+# dessus, et si cette cellule est dans la matrice, effectuer une opération sur
+# sa valeur.
+
+for position in CartesianIndices(V)
+    dessous = position + CartesianIndex(0, -1)
+    if dessous in CartesianIndices(V)
+        println(dessous)
+    end
+end
+
+# On utilise ici la structure `if un truc in plusieurs trucs`, qui renvoie
+# `true` si l'élément `un truc` fait partie de la collection `plusieurs trucs`.
+
+# On peut enfin itérer d'une manière qui nous renvoie à la fois la position et
+# la valeur:
+
+for (position, valeur) in enumerate(V)
+    println("La position $position contient la valeur $valeur")
+end
+
 # ## Nombres (pseudo)-aléatoires 
-
-
 
 import Random
 Random.seed!(2045)
 
 # # Un automate cellulaire pour la pigmentation
-# ## Règles biologiques
 
 # ## État initial
-
-# ## Mise à jour de l'activation des cellules
-
-# ## Résultat final
-
-using CairoMakie
-
-# Seed
-
-
 
 """
     etat_initial(rows, cols, p_activation)
@@ -81,6 +173,17 @@ function etat_initial(rows, cols, p_activation)
     end
     return lattice
 end
+
+# ## Règles biologiques
+
+# ## Mise à jour de l'activation des cellules
+
+# ## Résultat final
+
+using CairoMakie
+
+# Seed
+
 
 """
     voisins_valides(lattice, row, col, rayon)
