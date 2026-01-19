@@ -147,6 +147,26 @@ end
 import Random
 Random.seed!(2045)
 
+# ## Fonctions (moins que le minimum nécessaire!)
+
+function operation(entree1, entree2)
+    resultat = entree1 + entree2
+    return resultat
+end
+
+#-
+
+operation(1, 2)
+
+#-
+
+operation(3.0, 2.5)
+
+# Au cours de la session, nous allons _considérablement_ complexifier les tâches
+# que l'on peut faire en déclarant des fonctions, en introduisant notamment des
+# valeurs par défaut, des mot-clés, puis enfin des restrictions sur le type des
+# entrées. Pour cette séance, cette compréhension de base est suffisante.
+
 # # Un automate cellulaire pour la pigmentation
 
 # ## État initial
@@ -283,7 +303,7 @@ p_activation = 0.05  # Probabilité d'activation initiale
 temps = 100  # Nombre de générations à simuler
 
 # Initialisation de la grille
-lattice = etat_initial(lignes, colonnes, p_activation)
+lattice = etat_initial(lignes, colonnes, p_activation);
 
 # Pour chaque génération
 for gen in 1:temps
