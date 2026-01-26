@@ -6,6 +6,23 @@
 
 # # Concepts principaux
 
+# ## Nombres (pseudo)-aléatoires 
+
+# Quand on génère des nombres aléatoires, avec les fonctions comme `rand`, les
+# résultats sont différents à chaque fois. Pour faciliter la comparaison des
+# résultats, il est utile d'utiliser un `seed` , qui représente le point de
+# départ de l'algoritme des nombres (pseudo)-aléatoires.
+
+# Cette initialisation se fait de la façon suivante:
+
+import Random
+Random.seed!(2045)
+
+# Les nombres qui sont générés après cette commande seront toujours les mêmes,
+# mais vont respecter les propriétés des nombres aléatoires. La bonne pratique
+# est d'utiliser cette commande après avoir chargé les packages, et avant le
+# code.
+
 # ## Indexation basique dans les matrices
 
 # Dans la séance précédente, nous avons vu comment créer des matrices, et
@@ -19,11 +36,11 @@ V = rand(1:5, 3, 5)
 
 # On peut accéder à la première ligne de cette matrice avec
 
-V[1,:]
+V[1, :]
 
 # et à sa deuxième colonne avec
 
-V[:,2]
+V[:, 2]
 
 # On peut aussi prendre les deux premières lignes, et les trois dernières
 # colonnes, avec
@@ -142,25 +159,39 @@ for (position, valeur) in enumerate(V)
     println("La position $position contient la valeur $valeur")
 end
 
-# ## Nombres (pseudo)-aléatoires 
-
-import Random
-Random.seed!(2045)
-
 # ## Fonctions (moins que le minimum nécessaire!)
 
-function operation(entree1, entree2)
+# Lors de la dernière séance, nous avions mis des instructions dans une boucle
+# `for`. Pour rendre le code plus lisible, il est souvent pertinent de regrouper
+# des opérations similaires dans des fonctions. Dans les séances qui viennent,
+# nous allons introduire des façons plus complexes (et flexibles!) de définir
+# des fonctions. Pour le moment nous allons utiliser la syntaxe suivante:
+
+# ~~~raw
+# fonction nom(arg1, arg2, arg3)
+#   [operations sur arg1, arg2, arg3]
+#   return resultat
+# end
+# ~~~
+
+# Par example, on peut définir une fonction qui additione ses deux arguments
+# avec:
+
+function addition(entree1, entree2)
     resultat = entree1 + entree2
     return resultat
 end
 
 #-
 
-operation(1, 2)
+addition(1, 2)
 
 #-
 
-operation(3.0, 2.5)
+addition(3.0, 2.5)
+
+# Comme avec les boucles, les variables qui sont déclarées dans la fonction
+# n'existent _que_ dans la fonction.
 
 # Au cours de la session, nous allons _considérablement_ complexifier les tâches
 # que l'on peut faire en déclarant des fonctions, en introduisant notamment des
@@ -189,7 +220,7 @@ operation(3.0, 2.5)
 # qu'ici on définit deux variables sur la même ligne. C'est un raccourci
 # d'écriture qui n'est pas nécessaire.
 
-lignes, colonnes = 205, 155 
+lignes, colonnes = 205, 155
 
 # On définit ensuite une probabilité que les cellules soient initialement
 # pigmentées. Puisque c'est une probabilité, ce nombre devrait être entre 0 et
@@ -225,164 +256,176 @@ lattice = etat_initial(lignes, colonnes, p_activation);
 # exemple `pelage`, ou encore `🦓`. Julia accepte la majorité des [symboles
 # unicode](https://docs.julialang.org/en/v1/manual/unicode-input/). Il se peut
 # que votre police de caractère ne les affiche pas tous --- celles qui ont le
-# plus de support sont [Iosevka](https://typeof.net/Iosevka/) (ma préférée!),
-# [JuliaMono](https://juliamono.netlify.app/#), et dans une moindre mesure,
-# [Noto Sans Mono](https://fonts.google.com/noto/specimen/Noto+Sans+Mono). Elles
-# sont toutes gratuites.
+# plus de support sont [Iosevka](https://typeof.net/Iosevka/) (ma préférée),
+# [JuliaMono](https://juliamono.netlify.app/#) (utilisée dans ces notes de
+# cours), et dans une moindre mesure, [Noto Sans
+# Mono](https://fonts.google.com/noto/specimen/Noto+Sans+Mono) et [JetBrains
+# Mono](https://www.jetbrains.com/lp/mono/). Elles sont toutes gratuites.
 
 # ## Règles biologiques
 
 # Dans notre simulation du modèle de réaction/diffusion, une cellule va
 # s'activer si le signal qui encourage son activation est plus grand que le
 # signal qui encourage sa désactivation. Ces deux signaux se calculent de la
-# même façon: le nombre de voisins actifs, multiplié par le poids du signal d'activation.
+# même façon: le nombre de voisins actifs, multiplié par le poids du signal
+# d'activation.
 
 # Autrement dit, une cellule se pigmente _si_ $w_a N_a > w_i N_i$, avec $w_a$ et
 # $w_i$ les poids de l'activation et de l'inhibition, et $N_a$ et $N_i$ le
 # nombre de cellules voisines qui sont activées et inhibées.
 
 # Ce modèle représente une situation dans laquelle une cellule est activée en
-# réponse à la diffusion de deux substances: les cellules activées diffusent une
-# substance activatrice, et les cellules inhibées diffusent une substance
-# inhibitrice. Les poids $w_a$ et $w_i$ mesurent l'affinité des cellules pour
-# ces substances, et on peut modifier le rayon de diffusion des substances en
-# calculant le nombre de voisins dans un voisinage toujours plus grand.
+# réponse à la diffusion de deux substances: les cellules activées diffusent à
+# la fois une substance activatrice et une substance inhibitrice. Les poids
+# $w_a$ et $w_i$ mesurent l'affinité des cellules pour ces substances, et on
+# peut modifier le rayon de diffusion des substances en calculant le nombre de
+# voisins dans un voisinage toujours plus grand.
+
+# ## Identification des voisins
+
+# Nous allons devoir calculer les voisins qui sont actifs très souvents, et donc
+# c'est une bonne occasion de créer une fonction pour localiser ces voisins.
+# Nous allons supposer que nous cherchons des voisins qui sont dans un cercle
+# d'un diamètre donné.
+
+# Un point est dans un cercle si la distance Euclidienne entre ce point et le
+# centre du cercle est inférieure ou égale au rayon du cercle. Nous allons
+# pouvoir identifier les points via leurs `CartesianIndex`. Par exemple, le
+# point $(1, 1)$ est à une distance $\approx 1.41$ du centre du plan:
+
+sqrt(sum(Tuple(CartesianIndex(0, 0) - CartesianIndex(1, 1)) .^ 2))
+
+# **NB**: l'appel à `Tuple` est nécessaire ici. C'est comme ça. Tout n'a pas
+# toujours une explication satisfaisante.
+
+function point_dans_cercle(centre, point, rayon)
+    dᵢⱼ = sqrt(sum(Tuple(centre - point) .^ 2))
+    return dᵢⱼ <= rayon
+end
+
+# Cette fonction va donc nous permettre, pour chaque point de la matrice, de
+# trouver ses voisins. Par exemple, si on prend la position `[10, 15]` et qu'on
+# cherche les points dans un rayon de 2 cellules, on obtient:
+
+for cellule in CartesianIndices(lattice)
+    if point_dans_cercle(CartesianIndex(3, 5), cellule, 2)
+        println(cellule)
+    end
+end
+
+# Mais en pratique, on veut faire une tâche un peu plus compliquée: pour chaque
+# cellule, on souhaite compter ses voisins actifs, dans deux rayons possiblement
+# différents. On va donc commencer par faire une boucle sur chaque cellule:
+
+# ~~~ raw
+# for cellule in eachindex(lattice)
+#   1) identifier tous les voisins
+#   2) identifier ceux qui sont actifs
+# end
+# ~~~
+
+# Il existe une fonction, `findall`, qui permet d'identifier toutes les
+# positions d'une collection qui correspondent à un critère donné. Si on donne
+# uniquement une collection comme argument, `findall` renvoie les positions pour
+# lesquelle cette collection a la valeur `true`. On peut donc économiser du
+# temps, en limitant notre recherche aux cellules actives:
+
+centre = CartesianIndex(10, 12)
+for cellule_active in findall(lattice)
+    if point_dans_cercle(centre, cellule_active, 3)
+        println(cellule_active)
+    end
+end
+
+# On peut donc maintenant calculer le nombre de voisins:
+
+function nombre_de_voisins(cellule, cellules_actives, rayon_activation, rayon_inhibition)
+    na = 0
+    ni = 0
+    for voisin in cellules_actives
+        if point_dans_cercle(cellule, voisin, rayon_activation)
+            na += 1
+        end
+        if point_dans_cercle(cellule, voisin, rayon_inhibition)
+            ni += 1
+        end
+    end
+    return (na, ni)
+end
+
+# Cette approche du problème est assez lente, mais notre objectif pour cette
+# séance est de décomposer le problème au maximum. Dans la pratique, on peut
+# employer plusieurs méthodes pour (i) identifier une région carrée de la
+# matrice dans laquelle les cellules pertinentes sont contenues, et (ii)
+# identifier lequel des deux rayons est le plus grand pour ne vérifier le second
+# rayon que si c'est pertinent. Ces aéméliorations rendraient la fonction
+# beaucoup plus rapide, mais aussi plus longue.
+
+nombre_de_voisins(CartesianIndex(10, 12), findall(lattice), 12, 15)
 
 # ## Mise à jour de l'activation des cellules
 
-# ## Résultat final
+# Pour changer l'activation des cellules, il faut calculer le nouvel état de
+# chaque cellule, sans interférer avec l'état actuel. Nous allons donc devoir
+# créer une nouvelle lattice pour la génération suivante:
+
+prochaine_lattice = zeros(Bool, size(lattice));
+
+# Remarquez qu'on utilise `size(lattice)` pour que la lattice aie la même
+# taille.
+
+# On définit maintenant les paramètres de la simulation:
+
+wa = 0.25   # Poids de l'activation
+wi = 1.0  # Poids de l'inhibition
+Ra = 3.5  # Rayon d'activation
+Ri = 6  # Rayon d'inhibition
+
+# Puis on simule la première génération:
+
+cellules_actives = findall(lattice)
+
+for cellule in CartesianIndices(lattice)
+    na, ni = nombre_de_voisins(cellule, cellules_actives, Ra, Ri)
+    prochaine_lattice[cellule] = wa * na > wi * ni
+end
+
+# ## Simulation
+
+# Il faut maintenant répéter cette opération plusieurs fois:
+
+temps = 5  # Nombre de générations à simuler
+
+#-
+
+lattice = etat_initial(lignes, colonnes, p_activation);
+#-
+
+for generation in 1:temps
+    cellules_actives = findall(lattice)
+    prochaine_lattice = zeros(Bool, size(lattice))
+    for cellule in CartesianIndices(lattice)
+        ni, na = nombre_de_voisins(cellule, cellules_actives, Ra, Ri)
+        prochaine_lattice[cellule] = wa * na > wi * ni
+    end
+    for cellule in CartesianIndices(lattice)
+        lattice[cellule] = prochaine_lattice[cellule]
+    end
+end
+
+# On peut enfin visualiser le résultat:
 
 using CairoMakie
 
-# Seed
+#-
 
-
-"""
-    voisins_valides(lattice, row, col, rayon)
-
-Retourne les voisins valides d'une cellule dans un certain rayon.
-
-Arguments:
-- `lattice::Array{Bool, 2}`: Grille de cellules
-- `row::Int`: Ligne de la cellule
-- `col::Int`: Colonne de la cellule
-- `rayon::Int`: Rayon de recherche des voisins
-
-Retourne:
-- `Array{Bool, 2}`: Sous-grille des voisins valides
-"""
-function voisins_valides(lattice, row, col, rayon)
-    d_lignes = max(row - rayon, 1)
-    f_lignes = min(row + rayon, size(lattice, 1))
-    d_colonnes = max(col - rayon, 1)
-    f_colonnes = min(col + rayon, size(lattice, 2))
-    return lattice[d_lignes:f_lignes, d_colonnes:f_colonnes]
-end
-
-"""
-    nombre_voisins(lattice, row, col, rayon)
-
-Calcule le nombre de voisins d'une cellule dans un certain rayon.
-
-Arguments:
-- `lattice::Array{Bool, 2}`: Grille de cellules
-- `row::Int`: Ligne de la cellule
-- `col::Int`: Colonne de la cellule
-- `rayon::Int`: Rayon de recherche des voisins
-
-Retourne:
-- `Int`: Nombre de voisins
-"""
-function nombre_voisins(lattice, row, col, rayon)
-    voisinnage = voisins_valides(lattice, row, col, rayon)
-    n_voisins = count(voisinnage)
-    return n_voisins
-end
-
-"""
-    nouvel_etat(Na, Ni, wa, wi)
-
-Détermine le nouvel état d'une cellule en fonction du nombre de voisins activés et inhibés.
-
-Arguments:
-- `Na::Int`: Nombre de voisins activés
-- `Ni::Int`: Nombre de voisins inhibés
-- `wa::Float64`: Poids de l'activation
-- `wi::Float64`: Poids de l'inhibition
-
-Retourne:
-- `Bool`: Nouvel état de la cellule (true pour activé, false pour désactivé)
-"""
-function nouvel_etat(Na, Ni, wa, wi)
-    etat = wa * Na > wi * Ni
-    return etat
-end
-
-"""
-    afficher_matrice(matrice)
-
-Affiche une matrice de cellules, où les cellules activées sont représentées par '█' et les cellules désactivées par un espace.
-
-Arguments:
-- `matrice::Array{Bool, 2}`: Matrice de cellules à afficher
-
-Retourne:
-- Rien
-"""
-function afficher_matrice(matrice)
-    for i in 1:size(matrice, 1)
-        for j in 1:size(matrice, 2)
-            if matrice[i, j] == 1
-                print("█")
-            else
-                print(" ")
-            end
-        end
-        println()
-    end
-end
-
-# Variables
-wa = 1.0   # Poids de l'activation
-wi = 0.12  # Poids de l'inhibition
-Ra = 2  # Rayon d'activation
-Ri = 9  # Rayon d'inhibition
-
-# stuff i guess
-
-temps = 100  # Nombre de générations à simuler
-
-# Initialisation de la grille
-
-# Pour chaque génération
-for gen in 1:temps
-    ## Grille au temps suivant
-    temps_suivant = zeros(Bool, lignes, colonnes)
-    ## Pour chaque cellule
-    for row in 1:lignes
-        for col in 1:colonnes
-            ## Calcul du nombre de voisins activés et inhibés
-            activation = nombre_voisins(lattice, row, col, Ra)
-            inhibition = nombre_voisins(lattice, row, col, Ri)
-            ## Détermination du nouvel état de la cellule
-            temps_suivant[row, col] = nouvel_etat(activation, inhibition, wa, wi)
-        end
-    end
-    for i in 1:lignes
-        for j in 1:colonnes
-            lattice[i, j] = temps_suivant[i, j]
-        end
-    end
-end
-
-
-## Visualisation de type heatmap
 heatmap(
     ## On passe d'abord l'objet a visualiser
     lattice,
-    ## Puis on fixe les deux couleurs à blanc et noir
+    ## Puis on fixe les deux couleurs
     ## pour resp. `false` et `true`
-    colormap=[:white, :black],
+    colormap=[:midnightblue, :gold],
+    colorrange = (0, 1),
     ## On spécifie que les cellules du heatmap
     ## sont des carrés
     axis=(; aspect=DataAspect()),
@@ -396,3 +439,8 @@ heatmap(
 hidespines!(current_axis())
 hidedecorations!(current_axis())
 current_figure()
+
+# Est-ce que ce résultat ressemble à des motifs qu'on peut observer dans la
+# nature? Que pensez-vous que changer le rayon, ou la force de l'activation
+# ferait sur la coloration de cette surface? Est-ce que ça pourrait avoir un
+# effet sur la forme des motifs?
