@@ -20,7 +20,7 @@ age[rand(CartesianIndices(age))] = 1
 
 heatmap(age)
 
-neighbors = CartesianIndices((-1:1, -1:1))
+neighbors = [CartesianIndex(0, -1), CartesianIndex(0, 1), CartesianIndex(1, 0), CartesianIndex(-1, 0)]
 
 function competition_strength(x, y, xi)
     return exp(-((x-y)^2)/(2*xi^2))
