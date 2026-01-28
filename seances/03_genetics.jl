@@ -3,82 +3,40 @@ using CairoMakie
 import StatsBase
 import Random
 
-w, h = 80, 80
+cells = 250
+generations = 501
+mutation = 1e-4
+parents_distance = 3
 
-# Setup
-food = fill(50, w, h)
-genome = zeros(Float64, w, h)
-age = zeros(Int, w, h)
-
-# Age at reproduction
-age_at_repro = 8
-mutation_effect = 1e-2
-competition_tolerance = 0.2
-
-# Initial state
-age[rand(CartesianIndices(age))] = 1
-
-heatmap(age)
-
-neighbors = [CartesianIndex(0, -1), CartesianIndex(0, 1), CartesianIndex(1, 0), CartesianIndex(-1, 0)]
-
-function competition_strength(x, y, xi)
-    return exp(-((x-y)^2)/(2*xi^2))
+# État initial
+lattice = zeros(Bool, (cells, generations, 3))
+for i in Base.OneTo(cells)
+    lattice[i,1,:] = rand(Bool, 3)
 end
 
-# Radius for new cells
-function create_circular_neighborhood(R)
-    square = CartesianIndices((-R:R, -R:R))
-    circle = filter(r -> sqrt(sum(Tuple(CartesianIndex(0, 0) - r) .^ 2)) <= R, square)
-    return circle
-end
-
-competition_neighbors = create_circular_neighborhood(4)
-
-for gen in 1:250
-    @info gen
-
-    # Step 1 - growth and starvation
-    for cell in findall(!iszero, age)
-        food[cell] -= 1
-        if food[cell] <= 0
-            age[cell] = 0
-        else
-            age[cell] += 1
-        end
-    end
-
-    # Step 2 - cells that reproduce
-    cells = Random.shuffle(findall(==(age_at_repro), age))
-    for cell in cells
-        # We find the possible neighbors
-        N = cell .+ collect(neighbors)
-        N = filter(n -> n in CartesianIndices(food), N)
-        N = filter(n -> (food[n] > 0) & (age[n] == 0), N)
-        if !isempty(N)
-            # These neighbors have different competition
-            competition = zeros(length(N))
-            for (i, n) in enumerate(N)
-                all_around = n .+ competition_neighbors
-                all_around = filter(n -> n in CartesianIndices(food), all_around)
-                for a in all_around
-                    if age[a] != 0
-                        competition[i] += competition_strength(genome[cell], genome[a], competition_tolerance)
-                    end
-                end
-            end
-            competition ./= length(competition_neighbors)
-            for i in eachindex(competition)
-                if competition[i] < rand()
-                    competition[i] = 1.0
-                end
-            end
-            offsprings = StatsBase.sample(N, StatsBase.Weights(1.0.-competition.+eps()), min(2, length(N)), replace=false)
-            for offspring in offsprings
-                age[offspring] = 1
-                genome[offspring] = genome[cell] + mutation_effect * randn()
+# Première génération
+for generation in 2:generations
+    for i in Base.OneTo(cells)
+        parents_possibles = filter(p -> 1 <= p <= cells, (i-parents_distance):(i+parents_distance))
+        parents = StatsBase.sample(parents_possibles, 2, replace=false)
+        for gene in 1:3
+            lattice[i,generation,gene] = lattice[rand(parents),generation-1,gene]
+            if rand() <= mutation
+                lattice[i,generation,gene] = !lattice[i,generation,gene]
             end
         end
-        age[cell] = 0 # Cell dies after reproduction
     end
 end
+
+# Fonction pour les couleurs
+colormap = dropdims(mapslices(x -> CairoMakie.Colors.RGB(x...), lattice, dims=3), dims=3)
+
+# Heatmap et diversité
+f = Figure()
+ax = Axis(f[2,1]; aspect=DataAspect())
+heatmap!(ax, permutedims(colormap))
+plax = Axis(f[1,1])
+scatter!(plax, 0:(generations-1), vec(mapslices(x -> length(unique(x)), colormap, dims=1)), color=:black)
+ylims!(plax, 1, 8)
+xlims!(plax, 0, generations-1)
+f
