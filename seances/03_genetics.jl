@@ -3,10 +3,10 @@ using CairoMakie
 import StatsBase
 import Random
 
-cells = 250
+cells = 150
 generations = 501
 mutation = 1e-4
-parents_distance = 3
+parents_distance = 5
 
 # État initial
 lattice = zeros(Bool, (cells, generations, 3))
@@ -33,10 +33,12 @@ colormap = dropdims(mapslices(x -> CairoMakie.Colors.RGB(x...), lattice, dims=3)
 
 # Heatmap et diversité
 f = Figure()
-ax = Axis(f[2,1]; aspect=DataAspect())
-heatmap!(ax, permutedims(colormap))
+ax = Axis(f[2,1])
+heatmap!(ax, 0:(generations-1), 1:cells, permutedims(colormap))
+hideydecorations!(ax)
 plax = Axis(f[1,1])
 scatter!(plax, 0:(generations-1), vec(mapslices(x -> length(unique(x)), colormap, dims=1)), color=:black)
 ylims!(plax, 1, 8)
 xlims!(plax, 0, generations-1)
+xlims!(ax, 0, generations-1)
 f
