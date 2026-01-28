@@ -7,7 +7,7 @@ import Random
 cells = 100
 generations = 501
 mutation = 1e-4
-parents_distance = 1
+parents_distance = 3
 
 # État initial
 lattice = zeros(Bool, (cells, generations, 3))
