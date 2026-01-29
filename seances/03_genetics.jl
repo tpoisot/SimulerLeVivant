@@ -13,13 +13,13 @@
 # puisqu'elles sont très simples et à usage unique, on dispose d'une syntaxe
 # simplifiée, `argument -> operation`:
 
-x -> 2*x + 1
+x -> 2 * x + 1
 
 # Le symbole `->` est simplement `-` puis `>`.
 
 # Ces fonctions peuvent s'utiliser comme des fonctions régulières:
 
-(x -> 2*x + 1)(3)
+(x -> 2 * x + 1)(3)
 
 # ## Mapping et slicing
 
@@ -81,7 +81,7 @@ mapslices(sum, V, dims=1)
 # donnée en argument vaut `true`.
 
 x = rand(1:5, 10)
- 
+
 # On peut par exemple choisir uniquement les éléments compris entre 4 et 6 avec:
 
 filter(v -> 4 <= v <= 6, x)
@@ -138,52 +138,165 @@ import StatsBase
 
 # ## Choix des paramètres initiaux
 
-cells = 100
-generations = 501
-mutation = 1e-4
-parents_distance = 3
+# Taille de la population
 
-# État initial
-lattice = zeros(Bool, (cells, generations, 3))
+cells = 100
+
+# Nombre de générations
+
+generations = 501
+
+# Taux de mutation
+
+mutation = 1e-4
+
+# Distance autour du descendant dans laquelle on va choisir les parents
+
+parents_distance = 1
+
+# ## État initial
+
+# On définit l'état initial comme un `Array` avec trois dimensions: les
+# cellules, le temps, et les gènes:
+
+lattice = zeros(Bool, (cells, generations, 3));
+
+# Pour la premiè génération, on va simplement créer une population
+# polymorphique, dans laquelles les gènes ont un variant aléatoire:
+
 for i in Base.OneTo(cells)
-    lattice[i,1,:] = rand(Bool, 3)
+    lattice[i, 1, :] = rand(Bool, 3)
 end
 
-# Première génération
-for generation in 2:generations
-    for i in Base.OneTo(cells)
-        parents_possibles = filter(p -> 1 <= p <= cells, (i-parents_distance):(i+parents_distance))
-        parents = StatsBase.sample(parents_possibles, 2, replace=false)
-        for gene in 1:3
-            lattice[i,generation,gene] = lattice[rand(parents),generation-1,gene]
-            if rand() <= mutation
-                lattice[i,generation,gene] = !lattice[i,generation,gene]
-            end
+# ## Choix des parents potentiels
+
+# Pour une cellule ayant la position `i`, ses parents peuvent venir de toutes
+# les cellules de la génération précédente qui sont entre `i-d` et `i+d`, où `d`
+# est la distance dans laquelle on chosit les parents. Mais on sait que les
+# parents ne peuvent pas avoir un indice inférieur à 1, ou supérieur au nombre
+# de cellules:
+
+function parents_possibles(i, d, cells)
+    tous_possibles = (i-d):(i+d)
+    return filter(p -> 1 <= p <= cells, tous_possibles)
+end
+
+# Pour choisir les parents, on va simplement tirer au hasard deux parents parmi
+# tous ceux qui sont possibles, sans remplacement:
+
+function parents(i, d, cells)
+    return StatsBase.sample(parents_possibles(i, d, cells), 2, replace=false)
+end
+
+# ## Descendants
+
+# On peut créer un descendant à partir de ses deux parents:
+
+function descendant(parent1, parent2, taux_mutation)
+    genome = similar(parent1)
+    for i in eachindex(genome)
+        genome[i] = rand([parent1[i], parent2[i]])
+        if rand() <= taux_mutation
+            genome[i] = !genome[i]
         end
+    end
+    return genome
+end
+
+# ## Simulation
+
+# On va maintenant répéter ce processus plusieurs fois:
+
+for generation in 2:generations
+    for i in 1:cells
+        p1, p2 = parents(i, parents_distance, cells)
+        parent1 = lattice[p1, generation-1, :]
+        parent2 = lattice[p2, generation-1, :]
+        lattice[i, generation, :] = descendant(parent1, parent2, mutation)
     end
 end
 
-# Fonction pour les couleurs
+# ## Visualisation
+
+# Pour extraire les couleurs, il faut créer un objet de type `RGB`:
+
 colormap = dropdims(mapslices(x -> CairoMakie.Colors.RGB(x...), lattice, dims=3), dims=3);
 
-# Heatmap et diversité
-f = Figure(; size=(700, 500))
-ax = Axis(f[2,1])
+# On peut aussi visualiser cet objet en le triant par couleur:
+
+sorted_colormap = colormap[sortperm(hash.(colormap), dims=1)];
+
+# Attention, cette version ne permet pas de discuter de la structure spatiale de
+# la population, mais permettrait de visualiser des effets comme le _Muller's
+# ratchet_.
+
+# On peut maintenant regarder le changement de population au cours du temps:
+
+f = Figure(; size=(700, 300))
+ax = Axis(f[1, 1], xlabel="Génération")
 heatmap!(ax, 0:(generations-1), 1:cells, permutedims(colormap))
 hideydecorations!(ax)
-plax = Axis(f[1,1])
+xlims!(ax, 0, generations - 1)
+f
+
+# On peut aussi visualiser le nombre de génotypes uniques à chaque génération:
+
+f = Figure(; size=(700, 300))
+plax = Axis(f[1, 1], xlabel="Génération")
 lines!(plax, 0:(generations-1), vec(mapslices(x -> length(unique(x)), colormap, dims=1)), color=:black)
 ylims!(plax, 1, 8)
-xlims!(plax, 0, generations-1)
-xlims!(ax, 0, generations-1)
+xlims!(plax, 0, generations - 1)
 f
+
+# ## Suggestion de questions a explorer avec ce modèle
+
+# Est-ce que le taux de mutation change la richess qui se maintient après un
+# nombre fixe de générations? Vous pouvez choisir de vous diviser le travail, en
+# essayant plusieurs valeurs de taux de mutation entre $10^{-6}$ et $10^{-2}$,
+# par exemple.
+
+# Est-ce qu'une population panmictique, dans laquelle les parents peuvent venir
+# de très loin, maintient plus ou moins de diversité?
+
+# Est-ce qu'une population de grande taille maintient plus ou moins de
+# diversité?
 
 # # Suggestions pour le premier devoir
 
+# Ce modèle est concu pour vous permettre de faire des modifications pour le
+# premier devoir.
+
 # ## Paysage circulaire
+
+# On pourrait simuler des cellules disposées sur un anneau, en faisant en sorte
+# que si un voisin a un indice négatif, on reparte de la fin de la population
+# (et même chose à l'autre extremité). Est-ce qu'une population circulaire se
+# comporte de la même façon qu'une population linéaire? Quelles sont les
+# différences, et est-ce que l'effet de la panmixie est le même / se manifeste
+# au même moment?
 
 # ## Sélection génétique
 
+# On considère que les différents phénotypes ont le même coût / succès
+# reproducteur. En changeant la sélection des parents, comment peut-on assigner
+# un coût soit à un génotype spécifique, soit à un nombre de gènes qui portent
+# le variant `true`? Quelles sont les conséquences pour le maintien du
+# polymorphisme?
+
+# **Guide**: argument `weights` de `StatsBase.sample`.
+
 # ## Déséquilibre de liaison
 
+# On peut considèrer que les différents gènes ne sont plus indépendants, en
+# supposant par exemple que les gènes R et G sont liés. En choisissant un niveau
+# de déséquilibre de liaison, que l'on peut varier, explorez les conséquences
+# sur le polymorphisme, et sur le type de phénotypes qui persistent.
+
 # ## Traits quantitatifs
+
+# On peut transformer les gènes discrets en traits quantitatifs (QTLs), qui
+# varient de 0 (aucune expression) à 1 (expression maximale). Modifiez la
+# simulation pour représenter ce type de génome, et changez le code pour la
+# mutation pour introduire de petites mutations avec un effet quantitatif.
+
+# **Guide**: `randn`, et `clamp`.
