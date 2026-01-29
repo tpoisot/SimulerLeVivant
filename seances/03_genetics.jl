@@ -75,12 +75,68 @@ mapslices(sum, V, dims=1)
 
 # ## Filtres
 
+# Dans plusieurs situations, on va devoir identifier des éléments d'une
+# collection qui répondent à certains critères. On peut effectuer ce travail
+# avec `filter`, qui ne renvoie que les éléments pour lesquels la fonction
+# donnée en argument vaut `true`.
+
+x = rand(1:5, 10)
+ 
+# On peut par exemple choisir uniquement les éléments compris entre 4 et 6 avec:
+
+filter(v -> 4 <= v <= 6, x)
+
+# Les fonctions `map` et `filter` se combinent très bien. On peut par exemple
+# créer un vecteur qui contient les racines carrées des nombres pairs contenus
+# dans `x`:
+
+map(sqrt, filter(v -> v % 2 == 0, x))
+
+# ## Arrays à plusieurs dimensions
+
+# On peut créer des tableaux (`Array`) avec plus de deux dimensions. Par
+# exemple, cet objet est un "cube" avec quatre lignes, trois colonnes, et deux
+# "tranches" en profondeur:
+
+T = rand(1:9, (4, 3, 2))
+
+# On peut par exemple vérifier si la valeur minimum de chaque ligne est comprise
+# entre 2 et 4 avec:
+
+mapslices(x -> 2 <= minimum(x) <= 4, T, dims=2)
+
 # # Simulation: maintien du polymorphisme
+
+# Nous allons simuler une population de cellules avec un génome très simple,
+# composé de trois gènes: R (rouge), V (vert), et B (bleu). Ces gènes ont deux
+# allèles: allumé ou éteint. La combinaison de ces trois gènes détermine la
+# couleur de la cellule. Par exemple, une cellule avec le génome `101` (R et B
+# sont actifs) aura la couleur suivante:
 
 using CairoMakie
 CairoMakie.activate!(px_per_unit=2.0)
+CairoMakie.Colors.RGB(1, 0, 1)
+
+# À chaque génération, les cellules se reproduisent: chaque position dans
+# l'espace va choisir deux parents proches, au hasard, avec une distance
+# maximale que l'on peut fixer. Le descendant de ces deux parents portera un
+# mélange des génômes des deux parents. On suppose que les trois gènes vont se
+# transmettre de manière indépendante.
+
+# Après la reproduction, chaque position du génome des descendants peut subir
+# une mutation aléatoire, avec un taux faible.
+
+# Pour sélectionner des parents au hasard, nous aurons besoin de la fonction
+# `StatsBase.sample`:
 
 import StatsBase
+
+# L'environnement des cellules a une seule dimension, et on veut visualiser le
+# changement de phénotype au cours du temps. On suppose que la taille de la
+# population est constante: les positions sur la ligne qui représente la
+# population sont toutes toujours occupées.
+
+# ## Choix des paramètres initiaux
 
 cells = 100
 generations = 501
