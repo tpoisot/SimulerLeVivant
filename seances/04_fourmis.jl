@@ -1,8 +1,29 @@
+# ---
+# title: Séance 4
+# topic: Optimisation par colonies de fourmis
+# author: Timothée Poisot
+# ---
+
+# # Concepts principaux
+
+# ## Commentaires
+
+# ## Documentation
+
+# ## Passage par référence
+
+# ## Fonctions qui modifient leurs arguments
+
+# # Modèle
+
+
 using CairoMakie
 using Statistics
 using ProgressMeter
 using StatsBase
 CairoMakie.activate!(px_per_unit = 6.0)
+
+# ## LOL
 
 function disposition_points(n)
     angles = rand(n) .* 2π
