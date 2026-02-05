@@ -21,10 +21,10 @@ run(`cp bibliography.bib $(out_path)`)
 
 # Run the files
 for seance in seances
-    out_file = Literate.markdown(seance, out_path; config=cfg, flavor = Literate.CommonMarkFlavor())
-    @info out_file
-    run(`pandoc $(out_file) -o $(replace(out_file, ".md" => ".typ")) --template=template.typ`)
-    run(`typst compile $(replace(out_file, ".md" => ".typ"))`)
+    md_destination = joinpath(out_path, replace(basename(seance), ".jl" => ".md"))
+    if mtime(md_destination) <= mtime(seance)
+        out_file = Literate.markdown(seance, out_path; config=cfg, flavor=Literate.CommonMarkFlavor())
+        run(`pandoc $(out_file) -o $(replace(out_file, ".md" => ".typ")) --template=template.typ`)
+        run(`typst compile $(replace(out_file, ".md" => ".typ"))`)
+    end
 end
-
-# TODO: pandoc -> typst -> PDF
