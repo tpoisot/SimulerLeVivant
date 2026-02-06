@@ -175,7 +175,7 @@ end
 
 #-
 
-points = 20
+points = 25
 xy = disposition_points(points);
 
 #-
@@ -304,7 +304,7 @@ sites_disponibles = filter(x -> x != 1, 1:points);
 
 # On choisit les valeurs pour $\alpha$ et $\beta$:
 
-α, β = 1.0, 1.0
+α, β = 1.0, 1.3
 
 # Et on mesure les distances avec tous ces sites:
 
@@ -425,9 +425,12 @@ end
 
 f = Figure()
 ax = Axis(f[1, 1], aspect=DataAspect())
-for i in axes(P, 1)
-    for j in axes(P, 2)
-        lines!(ax, [xy[1, i], xy[1, j]], [xy[2, i], xy[2, j]], color=P[i, j], colorrange=extrema(P))
+for i in axes(M, 1)
+    for j in i:size(M, 2)
+        if j != i
+            lines!(ax, [xy[1, i], xy[1, j]], [xy[2, i], xy[2, j]], color=P[i, j], alpha=P[i, j], colorrange=extrema(P), colormap=:Greys)
+            lines!(ax, [xy[1, j], xy[1, i]], [xy[2, j], xy[2, i]], color=P[j, i], alpha=P[j, i], colorrange=extrema(P), colormap=:Greys)
+        end
     end
 end
 scatter!(ax, xy, color=:white, strokecolor=:black, strokewidth=1.5, markersize=12)
@@ -440,7 +443,7 @@ f
 # Pour permettre d'optimiser ce chemin, on veut enlever un peu de phéromones à
 # chaque génération. Cette opération est assez simple:
 
-evaporation_rate = 0.9
+evaporation_rate = 0.99
 P .*= evaporation_rate;
 
 # Une fois que cette évaporation est appliquée, il suffit de relancer une
@@ -461,16 +464,47 @@ for generation in 1:20
     P .*= evaporation_rate
 end
 
+# ## Visualisation
+
+# Matrice de distance entre deux points, en prennant en compte la distance _et_ les phéromones:
+
+M = (P.^α)./(D.^β);
+M[findall(isnan, M)] .= 0.0
+M = log1p.(M);
+
+M ./= maximum(M, dims=2)
+
+# Valeurs
+
+m_range = extrema(filter(!isnan, M))
+
 # Voici le résultat sous forme de figure.
 
 f = Figure()
 ax = Axis(f[1, 1], aspect=DataAspect())
-for i in axes(P, 1)
-    for j in axes(P, 2)
-        lines!(ax, [xy[1, i], xy[1, j]], [xy[2, i], xy[2, j]], color=P[i, j], alpha=P[i, j], colorrange=extrema(P), colormap=:Greys)
+for i in axes(M, 1)
+    for j in i:size(M, 2)
+        if j != i
+            lines!(ax, [xy[1, i], xy[1, j]], [xy[2, i], xy[2, j]], color=M[i, j], alpha=M[i, j], colorrange=m_range, colormap=:Greys)
+            lines!(ax, [xy[1, j], xy[1, i]], [xy[2, j], xy[2, i]], color=M[j, i], alpha=M[j, i], colorrange=m_range, colormap=:Greys)
+        end
     end
 end
 scatter!(ax, xy, color=:white, strokecolor=:black, strokewidth=1.5, markersize=12)
 hidespines!(ax)
 hidedecorations!(ax)
 f
+
+# ## Suggestions de modifications
+
+# On peut améliorer cette approche en mesurant d'abord la distance de tous les
+# chemins, et en supprimant les chemins qui ont une distance plus grande que la
+# distance médiane. Est-ce que la structure spatiale identifiée est différente?
+
+# Si on change le taux d'évaporation, et notamment en le rendant plus grand,
+# est-ce que la structure est différente, et pouvez-vous identifier une
+# explication à cette différence?
+
+# On considère que le mouvement de $i$ vers $j$ est différent du mouvement de
+# $j$ vers $i$. Si on enlève cette possibilité, est-ce que la structure spatiale
+# identifiée change?
