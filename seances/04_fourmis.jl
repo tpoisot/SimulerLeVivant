@@ -470,9 +470,8 @@ end
 
 M = (P.^α)./(D.^β);
 M[findall(isnan, M)] .= 0.0
-M = log1p.(M);
-
-M ./= maximum(M, dims=2)
+M = log1p.(M)
+M ./= maximum(M, dims=2);
 
 # Valeurs
 
