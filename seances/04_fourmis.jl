@@ -344,7 +344,7 @@ function chemin_proximity(xy, D)
     return chemin
 end
 
-# new test
+# On calcule maintenant un chemin au hasard avec ces nouvelles rêgles:
 
 C = chemin_proximity(xy, D .^ β);
 
@@ -360,7 +360,7 @@ hidespines!(ax)
 hidedecorations!(ax)
 f
 
-# La distance de ce chemin est meilleure que la version aléatoire:
+# La distance de ce chemin est-elle meilleure que la version aléatoire?
 
 distance_chemin(C, D)
 
