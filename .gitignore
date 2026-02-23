@@ -3,3 +3,6 @@ population_dynamics.mp4
 output/*.png
 output/*.typ
 output/*.md
+correction/*
+!correction/template.typ
+!correction/build.jl
