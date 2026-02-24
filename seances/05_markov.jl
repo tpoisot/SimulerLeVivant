@@ -25,8 +25,20 @@ function check_function_arguments(transitions, states)
     return nothing
 end
 
+function _sim_stochastic!(timeseries, transitions, generation)
+    for state in axes(timeseries, 1)
+        pop_change = rand(Multinomial(timeseries[state, generation], transitions[state, :]))
+        timeseries[:, generation+1] .+= pop_change
+    end
+end
+
+function _sim_determ!(timeseries, transitions, generation)
+    pop_change = (timeseries[:, generation]' * transitions)'
+    timeseries[:, generation+1] .= pop_change
+end
+
 function simulation(transitions, states; generations=500, stochastic=false)
-    
+
     check_transition_matrix!(transitions)
     check_function_arguments(transitions, states)
 
@@ -34,16 +46,10 @@ function simulation(transitions, states; generations=500, stochastic=false)
     timeseries = zeros(_data_type, length(states), generations + 1)
     timeseries[:, 1] = states
 
+    _sim_function! = stochastic ? _sim_stochastic! : _sim_determ!
+
     for generation in Base.OneTo(generations)
-        if stochastic
-            for state in axes(timeseries, 1)
-                pop_change = rand(Multinomial(timeseries[state, generation], transitions[state, :]))
-                timeseries[:, generation+1] .+= pop_change
-            end
-        else
-            pop_change = (timeseries[:, generation]' * transitions)'
-            timeseries[:, generation+1] .= pop_change
-        end
+        _sim_function!(timeseries, transitions, generation)
     end
 
     return timeseries
@@ -51,7 +57,7 @@ end
 
 # States
 # Barren, Grass, Shrubs
-s = [0, 500, 0]
+s = [100, 0, 0]
 states = length(s)
 patches = sum(s)
 
@@ -60,6 +66,7 @@ T = zeros(Float64, states, states)
 T[1, :] = [110, 8, 0]
 T[2, :] = [2, 120, 3]
 T[3, :] = [1, 0, 94]
+T
 
 states_names = ["Barren", "Grasses", "Shrubs"]
 states_colors = [:grey40, :orange, :teal]
@@ -70,17 +77,17 @@ f = Figure()
 ax = Axis(f[1, 1], xlabel="Nb. générations", ylabel="Nb. parcelles")
 
 # Stochastic simulation
-for _ in 1:10
-    sto_sim = simulation(Tm, s; stochastic=true, generations=200)
+for _ in 1:100
+    sto_sim = simulation(T, s; stochastic=true, generations=200)
     for i in eachindex(s)
-        lines!(ax, sto_sim[i, :], color=states_colors[i], alpha=0.2)
+        lines!(ax, sto_sim[i, :], color=states_colors[i], alpha=0.1)
     end
 end
 
 # Deterministic simulation
-det_sim = simulation(Tm, s; stochastic=false, generations=200)
+det_sim = simulation(T, s; stochastic=false, generations=200)
 for i in eachindex(s)
-    lines!(ax, det_sim[i, :], color=states_colors[i], alpha=1, label=states_names[i])
+    lines!(ax, det_sim[i, :], color=states_colors[i], alpha=1, label=states_names[i], linewidth=4)
 end
 
 axislegend(ax)
