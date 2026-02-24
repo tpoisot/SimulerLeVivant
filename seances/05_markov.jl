@@ -57,7 +57,7 @@ end
 
 # States
 # Barren, Grass, Shrubs
-s = [0, 100, 0]
+s = [100, 0, 0]
 states = length(s)
 patches = sum(s)
 
@@ -77,17 +77,17 @@ f = Figure()
 ax = Axis(f[1, 1], xlabel="Nb. générations", ylabel="Nb. parcelles")
 
 # Stochastic simulation
-for _ in 1:10
+for _ in 1:100
     sto_sim = simulation(T, s; stochastic=true, generations=200)
     for i in eachindex(s)
-        lines!(ax, sto_sim[i, :], color=states_colors[i], alpha=0.2)
+        lines!(ax, sto_sim[i, :], color=states_colors[i], alpha=0.1)
     end
 end
 
 # Deterministic simulation
 det_sim = simulation(T, s; stochastic=false, generations=200)
 for i in eachindex(s)
-    lines!(ax, det_sim[i, :], color=states_colors[i], alpha=1, label=states_names[i])
+    lines!(ax, det_sim[i, :], color=states_colors[i], alpha=1, label=states_names[i], linewidth=4)
 end
 
 axislegend(ax)
