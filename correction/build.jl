@@ -35,12 +35,23 @@ end
 
 # Run the files
 for travail in travaux
+    stu_name = split(basename(travail), "_")[1]
+    @info stu_name
     md_destination = joinpath(out_path, replace(basename(travail), ".jl" => ".md"))
     if mtime(md_destination) <= mtime(travail)
-        out_file = Literate.markdown(travail, out_path; config=cfg, flavor=Literate.CommonMarkFlavor(), preprocess = handle_comments)
-        run(`pandoc $(out_file) -o $(replace(out_file, ".md" => ".typ")) --template=correction/template.typ`)
-        run(`typst compile $(replace(out_file, ".md" => ".typ"))`)
-        run(`rm $(replace(out_file, ".md" => ".typ"))`)
-        run(`rm $(out_file)`)
+        try
+            out_file = Literate.markdown(travail, out_path; config=cfg, flavor=Literate.CommonMarkFlavor(), preprocess = handle_comments)
+            run(`pandoc $(out_file) -o $(replace(out_file, ".md" => ".typ")) --template=correction/template.typ`)
+            run(`typst compile $(replace(out_file, ".md" => ".typ"))`)
+            run(`rm $(replace(out_file, ".md" => ".typ"))`)
+            run(`rm $(out_file)`)
+        catch
+            @warn "\t$(stu_name) did not compile"
+        end
+    end
+    for f in readdir(out_path; join=true)
+        if !(endswith(f, ".pdf") | endswith(f, ".md"))
+            rm(f)
+        end
     end
 end
