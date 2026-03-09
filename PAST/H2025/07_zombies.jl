@@ -18,7 +18,7 @@ Base.@kwdef mutable struct Landscape
     ymax::Int64 = 25
 end
 
-L = Landscape(xmin=-80, xmax=80, ymin=-80, ymax=80)
+L = Landscape(xmin=-60, xmax=60, ymin=-60, ymax=60)
 
 Random.rand(::Type{Agent}, L::Landscape) = Agent(x=rand(L.xmin:L.xmax), y=rand(L.ymin:L.ymax))
 Random.rand(::Type{Agent}, L::Landscape, n::Int64) = [rand(Agent, L) for _ in 1:n]
@@ -40,7 +40,7 @@ function move!(A::Agent, L::Landscape; torus=true)
     return A
 end
 
-population = rand(Agent, L, 9000)
+population = rand(Agent, L, 4800)
 rand(population).infectious = true
 
 isinfectious(agent::Agent) = agent.infectious
@@ -111,4 +111,17 @@ axm = Axis(f[1:3,2:3])
 hm = scatter!(axm, x, y, color=t, colormap=:linear_wcmr_100_45_c42_n256, strokecolor=:black, strokewidth=1)
 Colorbar(f[1:3,end+1], hm, label="Time of infection")
 hidedecorations!(axm)
+current_figure()
+
+f = Figure()
+ax = Axis(f[1,1])
+
+for i in 2:length(events)
+    this_event = events[i]
+    right_event = filter(e -> e[5] == this_event[4], events)
+    if ~isempty(right_event)
+        lines!(ax, [right_event[1][2], events[i][2]], [right_event[1][3], events[i][3]], colormap=:grey70)
+    end
+end
+
 current_figure()
