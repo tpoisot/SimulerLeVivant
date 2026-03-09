@@ -120,7 +120,7 @@ for i in 2:length(events)
     this_event = events[i]
     right_event = filter(e -> e[5] == this_event[4], events)
     if ~isempty(right_event)
-        lines!(ax, [right_event[1][2], events[i][2]], [right_event[1][3], events[i][3]], colormap=:grey70)
+        lines!(ax, [right_event[1][2], events[i][2]], [right_event[1][3], events[i][3]], color=events[i][1], colormap=:linear_wcmr_100_45_c42_n256, colorrange=extrema(t))
     end
 end
 
