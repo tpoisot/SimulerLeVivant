@@ -4,13 +4,13 @@ using CairoMakie
 using Statistics
 using ProgressMeter
 
-number_of_agents = 120
+number_of_agents = 220
 
-iterations, timestep = 3.0, 1e-3
+iterations, timestep = 5.0, 1e-3
 
 clicks = round(Int, iterations * (1 / timestep))
 
-plot_size = (3, 3)
+plot_size = (4, 4)
 
 plot_at = round.(Int, LinRange(0, clicks, prod(plot_size)))
 
@@ -143,9 +143,9 @@ function forces!(school)
     end
 end
 
-parameters_shared = (repulsion_radius = 0.035, repulsion = 2.5, flocking_radius = 0.1, propulsion = 10.)
+parameters_shared = (repulsion_radius = 0.055, repulsion = 2.5, flocking_radius = 0.1, propulsion = 10.)
 parameters_slow = (parameters_shared..., flocking=3.0, target_speed = 0.02, stochasticity = 0.1)
-parameters_fast = (parameters_shared..., flocking=0.1, target_speed = 0.1, stochasticity = 0.1)
+parameters_fast = (parameters_shared..., flocking=0.1, target_speed = 0.06, stochasticity = 0.2)
 
 
 #f = Figure()
@@ -159,22 +159,22 @@ parameters_fast = (parameters_shared..., flocking=0.1, target_speed = 0.1, stoch
 	if i == 1
 		school = generate_school(number_of_agents; parameters_slow...)
 		
-        school[1].repulsion_radius *= 3.0
-        school[1].repulsion *= 5.0
-        school[1].flocking_radius *= 2.0
-        school[1].target_speed *= 2.0
-        school[1].stochasticity /= 2.0
+        # school[1].repulsion_radius *= 1.5
+        # school[1].repulsion *= 5.0
+        # school[1].flocking_radius *= 2.0
+        # school[1].target_speed *= 2.0
+        # school[1].stochasticity /= 2.0
 
-        #fraction_slow = 0.90
-		#n_slow = ceil(Int, fraction_slow * number_of_agents)
-		#n_fast = number_of_agents - n_slow
-		#slow = generate_school(n_slow; parameters_slow...)
-		#fast = generate_school(n_fast; parameters_fast...)
-		#school = vcat(slow, fast)
+        fraction_slow = 0.50
+		n_slow = ceil(Int, fraction_slow * number_of_agents)
+		n_fast = number_of_agents - n_slow
+		slow = generate_school(n_slow; parameters_slow...)
+		fast = generate_school(n_fast; parameters_fast...)
+		school = vcat(slow, fast)
 		
 		empty!(fig_axs[1])
 		fig_axs[1].title = "t ≈ 0.0"
-		arrows!(fig_axs[1], [fish.x for fish in school], [fish.y for fish in school], [0.2fish.vx for fish in school], [0.2fish.vy for fish in school], alpha=0.5, color=speeds(school), colormap=:berlin)
+		arrows2d!(fig_axs[1], [fish.x for fish in school], [fish.y for fish in school], [0.2fish.vx for fish in school], [0.2fish.vy for fish in school], alpha=0.5, color=speeds(school), colormap=:berlin)
 	end
 	forces!(school)
 	update!(school, timestep)
@@ -182,11 +182,11 @@ parameters_fast = (parameters_shared..., flocking=0.1, target_speed = 0.1, stoch
 		plot_position = findfirst(isequal(i), plot_at)
 		empty!(fig_axs[plot_position])
 		fig_axs[plot_position].title = "t ≈ $(round(i*timestep; digits=1))"
-		arrows!(fig_axs[plot_position], [fish.x for fish in school], [fish.y for fish in school], [0.2fish.vx for fish in school], [0.2fish.vy for fish in school], alpha=0.5, color=speeds(school), colormap=:berlin)
-        scatter!(fig_axs[plot_position], [school[1].x], [school[1].y], color=:red, markersize=24)
+		arrows2d!(fig_axs[plot_position], [fish.x for fish in school], [fish.y for fish in school], [0.2fish.vx for fish in school], [0.2fish.vy for fish in school], alpha=0.5, color=speeds(school), colormap=:berlin)
+        #scatter!(fig_axs[plot_position], [school[1].x], [school[1].y], color=:red, markersize=24)
 	end
-    #scatter!(ax, [fish.x for fish in school], [fish.y for fish in school], alpha=0.5, color=speeds(school), colormap=:Spectral, colorrange=(-0.1, 0.1), markersize=2)
-    #display(f)
+    # scatter!(ax, [fish.x for fish in school], [fish.y for fish in school], alpha=0.5, color=speeds(school), colormap=:Spectral, colorrange=(-0.1, 0.1), markersize=2)
+    # display(f)
 end
 
 fig
