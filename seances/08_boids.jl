@@ -4,9 +4,9 @@ using CairoMakie
 using Statistics
 using ProgressMeter
 
-number_of_agents = 220
+number_of_agents = 60
 
-iterations, timestep = 5.0, 1e-3
+iterations, timestep = 2.0, 1e-3
 
 clicks = round(Int, iterations * (1 / timestep))
 
@@ -143,9 +143,9 @@ function forces!(school)
     end
 end
 
-parameters_shared = (repulsion_radius = 0.055, repulsion = 2.5, flocking_radius = 0.1, propulsion = 10.)
-parameters_slow = (parameters_shared..., flocking=3.0, target_speed = 0.02, stochasticity = 0.1)
-parameters_fast = (parameters_shared..., flocking=0.1, target_speed = 0.06, stochasticity = 0.2)
+parameters_shared = (repulsion_radius = 0.035, repulsion = 2.5, flocking_radius = 0.2, propulsion = 10.)
+parameters_slow = (parameters_shared..., flocking=1.0, target_speed = 0.04, stochasticity = 0.5)
+parameters_fast = (parameters_shared..., flocking=0.1, repulsion = 3.5, target_speed = 0.06, stochasticity = 0.2)
 
 
 #f = Figure()
@@ -165,12 +165,12 @@ parameters_fast = (parameters_shared..., flocking=0.1, target_speed = 0.06, stoc
         # school[1].target_speed *= 2.0
         # school[1].stochasticity /= 2.0
 
-        fraction_slow = 0.50
-		n_slow = ceil(Int, fraction_slow * number_of_agents)
-		n_fast = number_of_agents - n_slow
-		slow = generate_school(n_slow; parameters_slow...)
-		fast = generate_school(n_fast; parameters_fast...)
-		school = vcat(slow, fast)
+        # fraction_slow = 0.50
+		# n_slow = ceil(Int, fraction_slow * number_of_agents)
+		# n_fast = number_of_agents - n_slow
+		# slow = generate_school(n_slow; parameters_slow...)
+		# fast = generate_school(n_fast; parameters_fast...)
+		# school = vcat(slow, fast)
 		
 		empty!(fig_axs[1])
 		fig_axs[1].title = "t ≈ 0.0"
